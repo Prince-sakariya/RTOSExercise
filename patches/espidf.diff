@@ -1,74 +1,8 @@
-diff --git a/components/freertos/app_startup.c b/components/freertos/app_startup.c
-index 99ea6ae..fa79b3d 100644
---- a/components/freertos/app_startup.c
-+++ b/components/freertos/app_startup.c
-@@ -57,7 +57,7 @@ CONFIG_FREERTOS_UNICORE and CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE should be identic
- // -------------------- Declarations -----------------------
- 
- static void main_task(void* args);
--static const char* APP_START_TAG = "app_start";
-+// static const char* APP_START_TAG = "app_start";
- 
- // ------------------ CPU0 App Startup ---------------------
- 
-@@ -80,24 +80,25 @@ void esp_startup_start_app(void)
-     esp_gdbstub_init();
- #endif // CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME
- 
--    BaseType_t res = xTaskCreatePinnedToCore(main_task, "main",
--                                             ESP_TASK_MAIN_STACK, NULL,
--                                             ESP_TASK_MAIN_PRIO, NULL, ESP_TASK_MAIN_CORE);
--    assert(res == pdTRUE);
--    (void)res;
--
--    /*
--    If a particular FreeRTOS port has port/arch specific OS startup behavior, they can implement a function of type
--    "void port_start_app_hook(void)" in their `port.c` files. This function will be called below, thus allowing each
--    FreeRTOS port to implement port specific app startup behavior.
--    */
--    void __attribute__((weak)) port_start_app_hook(void);
--    if (port_start_app_hook != NULL) {
--        port_start_app_hook();
--    }
--
--    ESP_EARLY_LOGI(APP_START_TAG, "Starting scheduler on CPU0");
--    vTaskStartScheduler();
-+    // BaseType_t res = xTaskCreatePinnedToCore(main_task, "main",
-+    //                                          ESP_TASK_MAIN_STACK, NULL,
-+    //                                          ESP_TASK_MAIN_PRIO, NULL, ESP_TASK_MAIN_CORE);
-+    // assert(res == pdTRUE);
-+    // (void)res;
-+
-+    // /*
-+    // If a particular FreeRTOS port has port/arch specific OS startup behavior, they can implement a function of type
-+    // "void port_start_app_hook(void)" in their `port.c` files. This function will be called below, thus allowing each
-+    // FreeRTOS port to implement port specific app startup behavior.
-+    // */
-+    // void __attribute__((weak)) port_start_app_hook(void);
-+    // if (port_start_app_hook != NULL) {
-+    //     port_start_app_hook();
-+    // }
-+
-+    // ESP_EARLY_LOGI(APP_START_TAG, "Starting scheduler on CPU0");
-+    // vTaskStartScheduler();
-+    main_task(NULL);
- }
- 
- // --------------- CPU[1:N-1] App Startup ------------------
-@@ -206,6 +207,6 @@ static void main_task(void* args)
-     ESP_LOGI(MAIN_TAG, "Calling app_main()");
-     extern void app_main(void);
-     app_main();
--    ESP_LOGI(MAIN_TAG, "Returned from app_main()");
--    vTaskDelete(NULL);
-+    // ESP_LOGI(MAIN_TAG, "Returned from app_main()");
-+    // vTaskDelete(NULL);
- }
 diff --git a/components/hal/include/hal/gpio_types.h b/components/hal/include/hal/gpio_types.h
-index c85f40d..0eaeb7b 100644
+index d98ee5a03b..1da2b7905d 100644
 --- a/components/hal/include/hal/gpio_types.h
 +++ b/components/hal/include/hal/gpio_types.h
-@@ -19,6 +19,62 @@ typedef enum {
+@@ -21,6 +21,62 @@ typedef enum {
      GPIO_PORT_MAX,
  } gpio_port_t;
  

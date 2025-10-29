@@ -6,6 +6,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <stdio.h>
+#include <Watchy.h>
 
 #define TICKS_PER_MS 1000
 
@@ -18,7 +19,7 @@
 #define DISPLAY_DC 10
 #define DISPLAY_BUSY 19
 
-GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> display(WatchyDisplay(DISPLAY_CS, DISPLAY_DC, DISPLAY_RES, DISPLAY_BUSY));
+GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> display(WatchyDisplay{});
 
 void initDisplay(void* pvParameters) {
     ESP_LOGI("initDisplay", "initializing display");
@@ -34,8 +35,7 @@ void initDisplay(void* pvParameters) {
     pinMode(TOP_RIGHT, INPUT);
 
     /* Init the display. */
-    display.epd2.selectSPI(SPI, SPISettings(20000000, MSBFIRST, SPI_MODE0));
-    display.init(0, true, 10, true);
+    display.epd2.initWatchy();
     display.setFullWindow();
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
@@ -95,7 +95,7 @@ void buttonWatch(void* pvParameters) {
 extern "C" void app_main() {
     /* Only priorities from 1-25 (configMAX_PRIORITIES) possible. */
     /* Initialize the display first. */
-    xTaskCreate(initDisplay, "initDisplay", 4096, NULL, configMAX_PRIORITIES, NULL);
+    xTaskCreate(initDisplay, "initDisplay", 4096, NULL, configMAX_PRIORITIES-1, NULL);
     xTaskCreate(buttonWatch, "watch", 8192, NULL, 1, NULL);
 
     ESP_LOGI("app_main", "Starting scheduler from app_main()");

@@ -4,23 +4,23 @@ thispath=$(realpath .)
 
 mkdir esp
 cd esp
-git clone --depth 1 --branch v5.1.6 --recursive https://github.com/espressif/esp-idf.git 
+git clone -b v5.5.1 --recursive https://github.com/espressif/esp-idf.git 
 
 mkdir watchy
 cd watchy
-git clone --depth 1 --branch 1.16.1 https://github.com/adafruit/Adafruit_BusIO.git
-git clone --depth 1 --branch 1.11.9 https://github.com/adafruit/Adafruit-GFX-Library.git
-git clone --depth 1 --branch 3.0.0-rc3 https://github.com/espressif/arduino-esp32.git arduino && \
+git clone -b 1.17.4 https://github.com/adafruit/Adafruit_BusIO.git
+git clone -b 1.12.3 https://github.com/adafruit/Adafruit-GFX-Library.git
+git clone -b 3.3.2 https://github.com/espressif/arduino-esp32.git arduino && \
     cd arduino && \
     git submodule update --init --recursive && cd ..
-git clone --depth 1 --branch 0.2.0 https://github.com/arduino-libraries/Arduino_JSON.git
-git clone --depth 1 --branch 2.0.1 https://github.com/JChristensen/DS3232RTC.git
-git clone --depth 1 --branch 1.5.6 https://github.com/ZinggJM/GxEPD2.git
-git clone --depth 1 --branch 3.2.1 https://github.com/arduino-libraries/NTPClient.git
-git clone --depth 1 --branch 1.0.3 https://github.com/orbitalair/Rtc_Pcf8563.git
-git clone --depth 1 --branch v1.6.1 https://github.com/PaulStoffregen/Time.git
-git clone --depth 1 --branch v1.4.7 https://github.com/sqfmi/Watchy.git
-git clone --depth 1 --branch v2.0.17 https://github.com/tzapu/WiFiManager.git
+git clone -b 0.2.0 https://github.com/arduino-libraries/Arduino_JSON.git
+git clone -b 3.1.2 https://github.com/JChristensen/DS3232RTC.git
+git clone -b 1.6.5 https://github.com/ZinggJM/GxEPD2.git
+git clone -b 3.2.1 https://github.com/arduino-libraries/NTPClient.git
+git clone -b 1.0.3 https://github.com/orbitalair/Rtc_Pcf8563.git
+git clone -b v1.6.1 https://github.com/PaulStoffregen/Time.git
+git clone -b v1.4.15 https://github.com/sqfmi/Watchy.git
+git clone -b v2.0.17 https://github.com/tzapu/WiFiManager.git
 
 cd $thispath
 cp patches/Arduino_JSON.cmake esp/watchy/Arduino_JSON/CMakeLists.txt
@@ -31,20 +31,25 @@ cp patches/Rtc_Pcf8563.cmake esp/watchy/Rtc_Pcf8563/CMakeLists.txt
 cp patches/Time.cmake esp/watchy/Time/CMakeLists.txt
 cp patches/Watchy.cmake esp/watchy/Watchy/CMakeLists.txt
 
-cp patches/espidf-patch.diff esp/esp-idf/
-cp patches/watchy-patch.diff esp/watchy/Watchy/
-cp patches/wifimanager-patch.diff esp/watchy/WiFiManager/
+sed -i '' 's/REQUIRES arduino-esp32/REQUIRES arduino/' esp/watchy/Adafruit_BusIO/CMakeLists.txt
+
+cp patches/espidf.diff esp/esp-idf/
+cp patches/watchy.diff esp/watchy/Watchy/
+cp patches/wifimanager.diff esp/watchy/WiFiManager/
 
 cd $thispath/esp/esp-idf/
-git apply espidf-patch.diff
+git apply espidf.diff
 
 cd $thispath/esp/watchy/Watchy/
-git apply watchy-patch.diff
+git apply watchy.diff
 
 cd $thispath/esp/watchy/WiFiManager/
-git apply wifimanager-patch.diff
+git apply wifimanager.diff
+
+rm -rf $thispath/esp/esp-idf/components/freertos && \
+ln -s $thispath/freertos $thispath/esp/esp-idf/components/freertos
 
 cd $thispath/esp/esp-idf/
 chmod +x install.sh
-./install.sh 
+./install.sh esp32
 . ./export.sh

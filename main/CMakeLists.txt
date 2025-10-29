@@ -1,1 +1,3 @@
-idf_component_register(SRCS "main.cpp" INCLUDE_DIRS "." REQUIRES Watchy)
+idf_component_register(SRCS "main.cpp" 
+PRIV_REQUIRES spi_flash Watchy
+INCLUDE_DIRS ".")
