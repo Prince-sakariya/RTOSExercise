@@ -305,3 +305,19 @@
  * Please use the Kconfig option CONFIG_FREERTOS_NUMBER_OF_CORES instead.
  */
 #define portNUM_PROCESSORS    configNUMBER_OF_CORES
+
+
+// Override Trace hook macros
+
+#define traceQUEUE_SEND( pxQueue )                                  \
+    {                                                               \
+        extern void vQueueSendTrace( void * );                      \
+        vQueueSendTrace( (void *)pxQueue );                         \
+    }
+
+#define traceQUEUE_RECEIVE( pxQueue )                               \
+    {                                                               \
+        extern void vQueueReceiveTrace( void * );                   \
+        vQueueReceiveTrace( (void *)pxQueue );                      \
+    }
+

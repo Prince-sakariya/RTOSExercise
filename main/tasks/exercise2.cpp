@@ -115,13 +115,13 @@ void printItems(void* args) {
         
         xStatus = xQueueReceive(xitemsQueue, &lReceivedItem, xTicksToWait);
         
-        if ( xStatus == pdPASS ) {
-            // Print on serial console
-            ESP_LOGI("printItems", "Printing: Item from Production Line %d", lReceivedItem);
-        }
-        else {
-            ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
-        }
+        // if ( xStatus == pdPASS ) {
+        //     // Print on serial console
+        //     ESP_LOGI("printItems", "Printing: Item from Production Line %d", lReceivedItem);
+        // }
+        // else {
+        //     ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
+        // }
     }
 }
 
