@@ -41,11 +41,11 @@ void masterTimerStart( void* args ) {
     vTaskDelay(pdMS_TO_TICKS(TASK_RUN_TIME));
 
     // Signal all tasks individually 
+    if (PrintingHandle)        xTaskNotifyGive(PrintingHandle);
     if (ProductionLine1Handle) xTaskNotifyGive(ProductionLine1Handle);
     if (ProductionLine2Handle) xTaskNotifyGive(ProductionLine2Handle);
     if (ProductionLine3Handle) xTaskNotifyGive(ProductionLine3Handle);
-    if (PrintingHandle)        xTaskNotifyGive(PrintingHandle);
-
+    
     // Wait for all tasks to confirm shutdown
     uint32_t received = 0;
     while ((received & 0x0F) != 0x0F)   // wait for bits 0–3
@@ -54,7 +54,7 @@ void masterTimerStart( void* args ) {
         xTaskNotifyWait(0, 0, &val, portMAX_DELAY);
         received |= val;
     }
-
+    
     QueueHandle_t q = xitemsQueue;
     xitemsQueue = NULL;
     vQueueDelete(q);

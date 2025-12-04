@@ -46,7 +46,13 @@ void LogFlush(void)
         if ( strstr( e->event, "FAILED" ) != NULL ) {
             ESP_LOGE( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
                      e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
-        } else {
+        } 
+        else if ( strstr( e->event, "TSK_INCR_TICK") != NULL )
+        {
+            ESP_LOGI( e->event, "[%lu ticks | %u [us] | task=%s",
+                    e->tickCount, e->microSeconds, e->taskName);
+        }
+        else {
             ESP_LOGI( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
                      e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
         }
