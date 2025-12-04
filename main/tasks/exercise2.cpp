@@ -36,6 +36,7 @@ void masterTimerStart( void* args ) {
     masterHandle = xTaskGetCurrentTaskHandle();
     // ESP_LOGI( "MASTER TIMER", "Timer started");
     // Wait for 1000 ticks
+    Log_Init();
     vTaskDelay(pdMS_TO_TICKS(TASK_RUN_TIME));
 
     // Signal all tasks individually 
@@ -57,9 +58,9 @@ void masterTimerStart( void* args ) {
     xitemsQueue = NULL;
     vQueueDelete(q);
 
-    // ESP_LOGI("MASTER", "All tasks stopped. Queue deleted.");
     LogFlush();
-
+    ESP_LOGI("MASTER", "All tasks stopped. Queue deleted. Log successfully flushed!");
+    
     vTaskDelete(NULL);
 }
 

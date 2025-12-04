@@ -2,21 +2,27 @@
 #define LOGGING_H
 
 #include "stdint.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
 
-// ------------------ Log Entry ------------------
+// ------------------ Log Entry Struct ------------------
 typedef struct {
-    uint32_t timestamp;
     const char *event;
-    void *obj;
-    uint32_t data;
+    TickType_t tickCount;      // FreeRTOS tick
+    uint32_t microSeconds;     // Fine-grained timestamp
+    QueueHandle_t queueHandle;         // Queue (handle) pointer 
+    TickType_t waitTicks;      // Max ticks the task will wait
+    const char* taskName;      // Calling task name
 } LogEntry_t;
+
 
 // ------------------ Logging API ------------------
 #ifdef __cplusplus
 extern "C" {
 #endif
 void Log_Init(void);  // optional if needed
-void LogEvent(const char *event, char *obj, uint32_t data);
+void LogEvent(const char *event, QueueHandle_t pxQueue);
 void LogFlush(void);
 
 #ifdef __cplusplus

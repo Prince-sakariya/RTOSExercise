@@ -1,29 +1,30 @@
 #include "logging.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 
 #define LOG_BUFFER_SIZE 1024
-#define LOG_TAG "APP_LOG"
+#define LOG_TAG "LOG"
 
-static LogEntry_t logBuffer[LOG_BUFFER_SIZE];
+static LogEntry_t logBuffer[ LOG_BUFFER_SIZE ];
 static volatile uint32_t logHead = 0;
 static volatile uint32_t logTail = 0;
 
-void Log_Init(void)
+void Log_Init( void )
 {
     logHead = 0;
     logTail = 0;
 }
 
-// Add a log entry (fast, non-blocking)
-void LogEvent(const char *event, char *obj, uint32_t data)
+// Core logging function
+void LogEvent( const char *event, QueueHandle_t queue )
 {
     uint32_t i = logHead % LOG_BUFFER_SIZE;
-    logBuffer[i].timestamp = xTaskGetTickCount();
-    logBuffer[i].event = event;
-    logBuffer[i].obj = obj;
-    logBuffer[i].data = data;
+    logBuffer[ i ].event = event;
+    logBuffer[ i ].tickCount = xTaskGetTickCount();
+    logBuffer[ i ].microSeconds = ( uint32_t )esp_timer_get_time();
+    logBuffer[ i ].queueHandle = queue;
+    logBuffer[ i ].waitTicks = 0;
+    logBuffer[ i ].taskName = pcTaskGetName( NULL );
 
     logHead++;
     if (logHead - logTail > LOG_BUFFER_SIZE) {
@@ -31,16 +32,22 @@ void LogEvent(const char *event, char *obj, uint32_t data)
     }
 }
 
-// Flush the log buffer using ESP_LOGI
+// Flush buffer to console
 void LogFlush(void)
 {
     while (logTail < logHead) {
         uint32_t i = logTail % LOG_BUFFER_SIZE;
-        LogEntry_t *e = &logBuffer[i];
-        ESP_LOGI(LOG_TAG, "[%lu] %s",
-                 e->timestamp, e->event);
+        LogEntry_t* e = &logBuffer[ i ];
+
+        // Use ESP_LOGE for failures
+        if ( strstr( e->event, "FAILED" ) != NULL ) {
+            ESP_LOGE( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu | task=%s",
+                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
+        } else {
+            ESP_LOGI( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu | task=%s",
+                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
+        }
+
         logTail++;
     }
-
-    // ESP_LOGI(LOG_TAG, "FLUSHING");
 }

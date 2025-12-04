@@ -9,7 +9,7 @@
 
 // ----------- Timing -----------
 #define TICKS_PER_MS 1000
-#define TASK_RUN_TIME 1000
+#define TASK_RUN_TIME 1050
 
 // ----------- Task Creation Handles -----------
 void startProductionLine1Task();

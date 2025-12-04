@@ -322,12 +322,67 @@
             }                                                           \
         } while( 0 )
 
+    #define traceQUEUE_SEND_FAILED( pxQueue )                           \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueSendFailedTrace( QueueHandle_t pxQueue );  \
+                vQueueSendFailedTrace( pxQueue );                       \
+            }                                                           \
+        } while ( 0 )
+    
+    #define traceQUEUE_SEND_FROM_ISR( pxQueue )                         \
+    do {                                                                \
+        extern QueueHandle_t xitemsQueue;                               \
+        if ( ( pxQueue ) == xitemsQueue ) {                             \
+            extern void vQueueSendFromISRTrace( QueueHandle_t pxQueue );       \
+            vQueueSendFromISRTrace( pxQueue );                                 \
+        }                                                               \
+    } while( 0 )
+
+    #define traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )                  \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueSendFromISRFailedTrace( QueueHandle_t pxQueue );  \
+                vQueueSendFromISRFailedTrace( pxQueue );                       \
+            }                                                           \
+        } while ( 0 )
+    
     #define traceQUEUE_RECEIVE( pxQueue )                               \
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
                 extern void vQueueReceiveTrace( QueueHandle_t pxQueue );  \
-                vQueueReceiveTrace( pxQueue );                             \
+                vQueueReceiveTrace( pxQueue );                          \
             }                                                           \
         } while( 0 )
+
+    #define traceQUEUE_RECEIVE_FAILED( pxQueue )                        \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueReceiveFailedTrace( QueueHandle_t pxQueue );  \
+                vQueueReceiveFailedTrace( pxQueue );                    \
+            }                                                           \
+        } while( 0 )
+    
+    #define traceQUEUE_RECEIVE_FROM_ISR( pxQueue )                      \
+    do {                                                                \
+        extern QueueHandle_t xitemsQueue;                               \
+        if ( ( pxQueue ) == xitemsQueue ) {                             \
+            extern void vQueueReceiveFromISRTrace( QueueHandle_t pxQueue );       \
+            vQueueReceiveFromISRTrace( pxQueue );                                 \
+        }                                                               \
+    } while( 0 )
+
+    #define traceQUEUE_RECEIVE_FROM_ISR_FAILED( pxQueue )               \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueReceiveFromISRFailedTrace( QueueHandle_t pxQueue );  \
+                vQueueReceiveFromISRFailedTrace( pxQueue );                       \
+            }                                                           \
+        } while ( 0 )    
+
 #endif /* def __ASSEMBLER__ */

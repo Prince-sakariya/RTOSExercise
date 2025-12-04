@@ -6,17 +6,50 @@
 // #include "esp_log.h" 
 
 static const char *QUEUE_SEND = "SEND";
+static const char *QUEUE_SEND_FAILED = "SEND FAILED";
+static const char *QUEUE_SEND_FROM_ISR = "SEND FROM ISR";
+static const char *QUEUE_SEND_FROM_ISR_FAILED = "SEND FROM ISR FAILED";
 static const char *QUEUE_RECEIVE = "RECV";
+static const char *QUEUE_RECEIVE_FAILED = "RECV FAILED";
+static const char *QUEUE_RECEIVE_FROM_ISR = "RECV FROM ISR";
+static const char *QUEUE_RECEIVE_FROM_ISR_FAILED = "RECV FROM ISR FAILED";
 
-void vQueueSendTrace( QueueHandle_t pxQueue )
+void vQueueSendTrace( QueueHandle_t xQueue )
 {   
-    // ESP_EARLY_LOGI( QUEUE_SEND, "\tTimestamp: %lu\tSent: ", xTaskGetTickCount() );
-    LogEvent(QUEUE_SEND, ( char* )pxQueue, 0);  // store in buffer
+    LogEvent( QUEUE_SEND, xQueue );  // store in buffer
 }
 
-void vQueueReceiveTrace( QueueHandle_t pxQueue )
-{   
-    // ESP_EARLY_LOGI( QUEUE_RECEIVE, "\tTimestamp: %lu\tReceived: ", xTaskGetTickCount() );
-    LogEvent(QUEUE_RECEIVE, ( char* )pxQueue, 0); // store in buffer
+void vQueueSendFailedTrace( QueueHandle_t xQueue )
+{
+    LogEvent( QUEUE_SEND_FAILED, xQueue); // store in buffer
+}
 
+void vQueueSendFromISRTrace( QueueHandle_t xQueue )
+{   
+    LogEvent( QUEUE_SEND_FROM_ISR, xQueue );  // store in buffer
+}
+
+void vQueueSendFromISRFailedTrace( QueueHandle_t xQueue )
+{
+    LogEvent( QUEUE_SEND_FROM_ISR_FAILED, xQueue); // store in buffer
+}
+
+void vQueueReceiveTrace( QueueHandle_t xQueue )
+{   
+    LogEvent( QUEUE_RECEIVE, xQueue ); // store in buffer
+}
+
+void vQueueReceiveFailedTrace( QueueHandle_t xQueue )
+{
+    LogEvent( QUEUE_RECEIVE_FAILED, xQueue); // store in buffer
+}
+
+void vQueueReceiveFromISRTrace( QueueHandle_t xQueue )
+{   
+    LogEvent( QUEUE_RECEIVE_FROM_ISR, xQueue );  // store in buffer
+}
+
+void vQueueReceiveFromISRFailedTrace( QueueHandle_t xQueue )
+{
+    LogEvent( QUEUE_RECEIVE_FROM_ISR_FAILED, xQueue); // store in buffer
 }
