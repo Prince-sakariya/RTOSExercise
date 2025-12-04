@@ -2,12 +2,15 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
-#define LOG_BUFFER_SIZE 1024
+#define LOG_BUFFER_SIZE 2048
 #define LOG_TAG "LOG"
 
 static LogEntry_t logBuffer[ LOG_BUFFER_SIZE ];
 static volatile uint32_t logHead = 0;
 static volatile uint32_t logTail = 0;
+
+// ------------------ Logging Flag -----------------
+volatile TickType_t xLoggingEnabled = 0;
 
 void Log_Init( void )
 {
@@ -16,11 +19,11 @@ void Log_Init( void )
 }
 
 // Core logging function
-void LogEvent( const char *event, QueueHandle_t queue, TickType_t waitTicks )
+void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks )
 {
     uint32_t i = logHead % LOG_BUFFER_SIZE;
     logBuffer[ i ].event = event;
-    logBuffer[ i ].tickCount = xTaskGetTickCount();
+    logBuffer[ i ].tickCount = tickCount;
     logBuffer[ i ].microSeconds = ( uint32_t )esp_timer_get_time();
     logBuffer[ i ].queueHandle = queue;
     logBuffer[ i ].waitTicks = waitTicks;

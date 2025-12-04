@@ -14,42 +14,42 @@ static const char *QUEUE_RECEIVE_FAILED = "RECV FAILED";
 static const char *QUEUE_RECEIVE_FROM_ISR = "RECV FROM ISR";
 static const char *QUEUE_RECEIVE_FROM_ISR_FAILED = "RECV FROM ISR FAILED";
 
-void vQueueSendTrace( QueueHandle_t xQueue, TickType_t waitTicks )
+void vQueueSendTrace( QueueHandle_t xQueue, TickType_t tickCount, TickType_t waitTicks )
 {   
-    LogEvent( QUEUE_SEND, xQueue, waitTicks );  // store in buffer
+    LogEvent( QUEUE_SEND, tickCount, xQueue, waitTicks );  // store in buffer
 }
 
-void vQueueSendFailedTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueSendFailedTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {
-    LogEvent( QUEUE_SEND_FAILED, xQueue, waitTicks ); // store in buffer
+    LogEvent( QUEUE_SEND_FAILED, tickCount, xQueue, waitTicks ); // store in buffer
 }
 
-void vQueueSendFromISRTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueSendFromISRTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {   
-    LogEvent( QUEUE_SEND_FROM_ISR, xQueue, waitTicks );  // store in buffer
+    LogEvent( QUEUE_SEND_FROM_ISR, tickCount, xQueue, waitTicks );  // store in buffer
 }
 
-void vQueueSendFromISRFailedTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueSendFromISRFailedTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {
-    LogEvent( QUEUE_SEND_FROM_ISR_FAILED, xQueue, waitTicks ); // store in buffer
+    LogEvent( QUEUE_SEND_FROM_ISR_FAILED, tickCount, xQueue, waitTicks ); // store in buffer
 }
 
-void vQueueReceiveTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueReceiveTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {   
-    LogEvent( QUEUE_RECEIVE, xQueue, waitTicks ); // store in buffer
+    LogEvent( QUEUE_RECEIVE, tickCount, xQueue, waitTicks ); // store in buffer
 }
 
-void vQueueReceiveFailedTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueReceiveFailedTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {
-    LogEvent( QUEUE_RECEIVE_FAILED, xQueue, waitTicks ); // store in buffer
+    LogEvent( QUEUE_RECEIVE_FAILED, tickCount, xQueue, waitTicks ); // store in buffer
 }
 
-void vQueueReceiveFromISRTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueReceiveFromISRTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {   
-    LogEvent( QUEUE_RECEIVE_FROM_ISR, xQueue, waitTicks );  // store in buffer
+    LogEvent( QUEUE_RECEIVE_FROM_ISR, tickCount, xQueue, waitTicks );  // store in buffer
 }
 
-void vQueueReceiveFromISRFailedTrace( QueueHandle_t xQueue , TickType_t waitTicks )
+void vQueueReceiveFromISRFailedTrace( QueueHandle_t xQueue , TickType_t tickCount, TickType_t waitTicks )
 {
-    LogEvent( QUEUE_RECEIVE_FROM_ISR_FAILED, xQueue, waitTicks ); // store in buffer
+    LogEvent( QUEUE_RECEIVE_FROM_ISR_FAILED, tickCount, xQueue, waitTicks ); // store in buffer
 }

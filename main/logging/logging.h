@@ -16,13 +16,15 @@ typedef struct {
     const char* taskName;      // Calling task name
 } LogEntry_t;
 
+// ------------------ Logging Flag -----------------
+extern volatile TickType_t xLoggingEnabled;
 
 // ------------------ Logging API ------------------
 #ifdef __cplusplus
 extern "C" {
 #endif
 void Log_Init(void);  // optional if needed
-void LogEvent(const char *event, QueueHandle_t pxQueue, TickType_t waitTicks );
+void LogEvent(const char *event, TickType_t tickCount, QueueHandle_t pxQueue, TickType_t waitTicks );
 void LogFlush(void);
 
 #ifdef __cplusplus

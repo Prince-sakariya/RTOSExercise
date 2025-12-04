@@ -134,6 +134,11 @@ list(APPEND include_dirs
                                     #   - `#include "freertos/...h"`
                                     #   - `#include "esp_private/...h"`
 
+list(APPEND include_dirs
+    "trace_hooks/include")          # For trace hook headers via
+                                    #   - `#include "...h"`
+
+
 # ----------------------------------------------- Set Private Includes -------------------------------------------------
 
 # Add common private include directories
@@ -155,6 +160,11 @@ endif()
 # Add ESP-additions private include directories
 list(APPEND private_include_dirs
     "esp_additions")                # For `include "freertos_tasks_c_additions.h"`
+
+list(APPEND private_include_dirs
+    "trace_hooks"                   # For trace hook headers via
+                                    #   - `#include "trace_hooks/...h"`
+)
 
 # ------------------------------------------------------- Misc ---------------------------------------------------------
 
