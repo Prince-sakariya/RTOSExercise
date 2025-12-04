@@ -16,14 +16,14 @@ void Log_Init( void )
 }
 
 // Core logging function
-void LogEvent( const char *event, QueueHandle_t queue )
+void LogEvent( const char *event, QueueHandle_t queue, TickType_t waitTicks )
 {
     uint32_t i = logHead % LOG_BUFFER_SIZE;
     logBuffer[ i ].event = event;
     logBuffer[ i ].tickCount = xTaskGetTickCount();
     logBuffer[ i ].microSeconds = ( uint32_t )esp_timer_get_time();
     logBuffer[ i ].queueHandle = queue;
-    logBuffer[ i ].waitTicks = 0;
+    logBuffer[ i ].waitTicks = waitTicks;
     logBuffer[ i ].taskName = pcTaskGetName( NULL );
 
     logHead++;
@@ -41,10 +41,10 @@ void LogFlush(void)
 
         // Use ESP_LOGE for failures
         if ( strstr( e->event, "FAILED" ) != NULL ) {
-            ESP_LOGE( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu | task=%s",
+            ESP_LOGE( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
                      e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
         } else {
-            ESP_LOGI( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu | task=%s",
+            ESP_LOGI( e->event, "[%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
                      e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
         }
 

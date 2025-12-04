@@ -310,15 +310,21 @@
 // Override Trace hook macros
 #ifndef __ASSEMBLER__
     #ifdef configUSE_TRACE_FACILITY
-        #define configUSE_TRACE_FACILITY        0
+        #define configUSE_TRACE_FACILITY        1
     #endif
+
+    #define traceQUEUE_SET_SEND(pxQueueSet) \
+    do { \
+        const char* taskName = pcTaskGetName(NULL); \
+    } while(0)
 
     #define traceQUEUE_SEND( pxQueue )                                  \
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueSendTrace( QueueHandle_t pxQueue );  \
-                vQueueSendTrace( pxQueue );                             \
+                TickType_t waitTicks = xTicksToWait;                    \
+                extern void vQueueSendTrace( QueueHandle_t pxQueue, TickType_t waitTicks);   \
+                vQueueSendTrace( pxQueue, waitTicks );                             \
             }                                                           \
         } while( 0 )
 

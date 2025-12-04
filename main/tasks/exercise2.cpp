@@ -90,7 +90,7 @@ void produceItemProductionLine1(void* args) {
             ESP_LOGE( "produceItemProductionLine1", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend1, 0 );
+        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend1, pdMS_TO_TICKS( period ) );
 
         if ( xStatus != pdPASS ) {
             ESP_LOGE( "produceItemProductionLine1", "Could not send to the queue. Tick: %u\r\n", tick );
@@ -129,7 +129,7 @@ void produceItemProductionLine2(void* args) {
             ESP_LOGE( "produceItemProductionLine2", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend2, 0 );
+        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend2, pdMS_TO_TICKS( period ) );
 
         if ( xStatus != pdPASS ) {
             ESP_LOGE( "produceItemProductionLine2", "Could not send to the queue. Tick: %u\r\n", tick );
@@ -168,7 +168,7 @@ void produceItemProductionLine3(void* args) {
             ESP_LOGE( "produceItemProductionLine3", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend3, 0 );
+        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend3, pdMS_TO_TICKS( period ) );
 
         if ( xStatus != pdPASS ) {
             ESP_LOGE( "produceItemProductionLine3", "Could not send to the queue. Tick: %u\r\n", tick );
@@ -226,15 +226,15 @@ void printItems(void* args) {
 // Task Creation Wrappers
 // ------------------------------------------------------
 void startProductionLine1Task() {
-    xTaskCreate( produceItemProductionLine1, "produceItemProductionLine1", 4096, NULL, 3, &ProductionLine1Handle );
+    xTaskCreate( produceItemProductionLine1, "ProdLine1", 4096, NULL, 3, &ProductionLine1Handle );
 }
 
 void startProductionLine2Task() {
-    xTaskCreate( produceItemProductionLine2, "produceItemProductionLine2", 4096, NULL, 3, &ProductionLine2Handle );
+    xTaskCreate( produceItemProductionLine2, "ProdLine2", 4096, NULL, 3, &ProductionLine2Handle );
 }
 
 void startProductionLine3Task() {
-    xTaskCreate( produceItemProductionLine3, "produceItemProductionLine3", 4096, NULL, 3, &ProductionLine3Handle );
+    xTaskCreate( produceItemProductionLine3, "ProdLine3", 4096, NULL, 3, &ProductionLine3Handle );
 }
 
 void startPrintingTask() {

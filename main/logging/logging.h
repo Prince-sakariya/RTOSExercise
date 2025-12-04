@@ -22,7 +22,7 @@ typedef struct {
 extern "C" {
 #endif
 void Log_Init(void);  // optional if needed
-void LogEvent(const char *event, QueueHandle_t pxQueue);
+void LogEvent(const char *event, QueueHandle_t pxQueue, TickType_t waitTicks );
 void LogFlush(void);
 
 #ifdef __cplusplus
