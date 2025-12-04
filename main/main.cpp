@@ -2,6 +2,7 @@
 // #include "tasks/stopwatch.h"
 #include "tasks/exercise2.h"
 #include <esp_log.h>
+#include "logging/logging.h"
 
 extern "C" void app_main() {
 
@@ -12,6 +13,10 @@ extern "C" void app_main() {
     // startButtonInputTask();
 
     // Exercise 2
+    Log_Init();
+    xLoggingEnabled = 1; // <-- Start logging
+ 
+
     // Create the items Queue
     createItemsQueue();
 

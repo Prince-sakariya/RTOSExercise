@@ -34,17 +34,18 @@ void createItemsQueue() {
 
 void masterTimerStart( void* args ) {
     masterHandle = xTaskGetCurrentTaskHandle();
-    // ESP_LOGI( "MASTER TIMER", "Timer started");
-    // Wait for 1000 ticks
-    Log_Init();
-    xLoggingEnabled = 1; // <-- Start logging
+ 
     vTaskDelay(pdMS_TO_TICKS(TASK_RUN_TIME));
 
+    QueueHandle_t q = xitemsQueue;
+    xitemsQueue = NULL;
+    vQueueDelete(q);
+
     // Signal all tasks individually 
-    if (PrintingHandle)        xTaskNotifyGive(PrintingHandle);
     if (ProductionLine1Handle) xTaskNotifyGive(ProductionLine1Handle);
     if (ProductionLine2Handle) xTaskNotifyGive(ProductionLine2Handle);
     if (ProductionLine3Handle) xTaskNotifyGive(ProductionLine3Handle);
+    if (PrintingHandle)        xTaskNotifyGive(PrintingHandle);
     
     // Wait for all tasks to confirm shutdown
     uint32_t received = 0;
@@ -55,10 +56,6 @@ void masterTimerStart( void* args ) {
         received |= val;
     }
     
-    QueueHandle_t q = xitemsQueue;
-    xitemsQueue = NULL;
-    vQueueDelete(q);
-
     xLoggingEnabled = 0; // <- Stop logging
     LogFlush();
     ESP_LOGI("MASTER", "All tasks stopped. Queue deleted. Log successfully flushed!");
@@ -92,10 +89,13 @@ void produceItemProductionLine1(void* args) {
             ESP_LOGE( "produceItemProductionLine1", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend1, pdMS_TO_TICKS( period ) );
+        // Send item to queue if it exists
+        if (xitemsQueue != NULL) {
+            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend1, pdMS_TO_TICKS( period ) );
 
-        if ( xStatus != pdPASS ) {
-            ESP_LOGE( "produceItemProductionLine1", "Could not send to the queue. Tick: %u\r\n", tick );
+            if ( xStatus != pdPASS ) {
+                ESP_LOGE( "produceItemProductionLine1", "Could not send to the queue. Tick: %u\r\n", tick );
+            }
         }
     }
 
@@ -131,10 +131,13 @@ void produceItemProductionLine2(void* args) {
             ESP_LOGE( "produceItemProductionLine2", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend2, pdMS_TO_TICKS( period ) );
+        // Send item to queue if it exists
+        if (xitemsQueue != NULL) {
+            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend2, pdMS_TO_TICKS( period ) );
 
-        if ( xStatus != pdPASS ) {
-            ESP_LOGE( "produceItemProductionLine2", "Could not send to the queue. Tick: %u\r\n", tick );
+            if ( xStatus != pdPASS ) {
+                ESP_LOGE( "produceItemProductionLine2", "Could not send to the queue. Tick: %u\r\n", tick );
+            }
         }
     }
 
@@ -170,10 +173,13 @@ void produceItemProductionLine3(void* args) {
             ESP_LOGE( "produceItemProductionLine3", "deadline miss at %lu", tick );
         
         // Send item to printer
-        xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend3, pdMS_TO_TICKS( period ) );
+        // Send item to queue if it exists
+        if (xitemsQueue != NULL) {
+            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend3, pdMS_TO_TICKS( period ) );
 
-        if ( xStatus != pdPASS ) {
-            ESP_LOGE( "produceItemProductionLine3", "Could not send to the queue. Tick: %u\r\n", tick );
+            if ( xStatus != pdPASS ) {
+                ESP_LOGE( "produceItemProductionLine3", "Could not send to the queue. Tick: %u\r\n", tick );
+            }
         }
     }
 
@@ -189,7 +195,7 @@ void produceItemProductionLine3(void* args) {
 void printItems(void* args) {
     int32_t lReceivedItem;
     BaseType_t xStatus;
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 50 );
     
     // Get item from Queue
     for ( ;; ) {
@@ -203,17 +209,20 @@ void printItems(void* args) {
         //     ESP_LOGI( "printItems", "Queue should have been empty!\r\n" );
         // }
         
-        xStatus = xQueueReceive(xitemsQueue, &lReceivedItem, xTicksToWait);
-        
+        // Receive item from queue if it exists
+        if (xitemsQueue != NULL) {
+            xStatus = xQueueReceive(xitemsQueue, &lReceivedItem, xTicksToWait);
+            if ( xStatus != pdPASS ) {
+                // Print on serial console
+                // ESP_LOGI("printItems", "Printing: Item from Production Line %d", lReceivedItem);
+                ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
+            }
+        }
+
         // check stop again in case we woke because master sent the signal
         if (ulTaskNotifyTake(pdTRUE, 0) > 0)
             break;
 
-        if ( xStatus != pdPASS ) {
-            // Print on serial console
-            // ESP_LOGI("printItems", "Printing: Item from Production Line %d", lReceivedItem);
-            ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
-        }
         // else {
         //     ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
         // }

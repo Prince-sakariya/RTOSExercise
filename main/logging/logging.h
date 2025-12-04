@@ -24,7 +24,14 @@ extern volatile TickType_t xLoggingEnabled;
 extern "C" {
 #endif
 void Log_Init(void);  // optional if needed
-void LogEvent(const char *event, TickType_t tickCount, QueueHandle_t pxQueue, TickType_t waitTicks );
+void LogEvent(
+    const char *event, 
+    TickType_t tickCount, 
+    QueueHandle_t pxQueue, 
+    TickType_t waitTicks, 
+    const char* taskName 
+);
+
 void LogFlush(void);
 
 #ifdef __cplusplus
