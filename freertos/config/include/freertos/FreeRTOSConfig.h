@@ -308,16 +308,26 @@
 
 
 // Override Trace hook macros
+#ifndef __ASSEMBLER__
+    #ifdef configUSE_TRACE_FACILITY
+        #define configUSE_TRACE_FACILITY        0
+    #endif
 
-#define traceQUEUE_SEND( pxQueue )                                  \
-    {                                                               \
-        extern void vQueueSendTrace( void * );                      \
-        vQueueSendTrace( (void *)pxQueue );                         \
-    }
+    #define traceQUEUE_SEND( pxQueue )                                  \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueSendTrace( QueueHandle_t pxQueue );  \
+                vQueueSendTrace( pxQueue );                             \
+            }                                                           \
+        } while( 0 )
 
-#define traceQUEUE_RECEIVE( pxQueue )                               \
-    {                                                               \
-        extern void vQueueReceiveTrace( void * );                   \
-        vQueueReceiveTrace( (void *)pxQueue );                      \
-    }
-
+    #define traceQUEUE_RECEIVE( pxQueue )                               \
+        do {                                                            \
+            extern QueueHandle_t xitemsQueue;                           \
+            if ( ( pxQueue ) == xitemsQueue ) {                         \
+                extern void vQueueReceiveTrace( QueueHandle_t pxQueue );  \
+                vQueueReceiveTrace( pxQueue );                             \
+            }                                                           \
+        } while( 0 )
+#endif /* def __ASSEMBLER__ */

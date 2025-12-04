@@ -15,6 +15,9 @@ extern "C" void app_main() {
     // Create the items Queue
     createItemsQueue();
 
+    // Start Task Timer
+    startTaskTimer();
+
     // Create the periodic tasks
     startProductionLine1Task();
     startProductionLine2Task();
@@ -26,4 +29,7 @@ extern "C" void app_main() {
     ESP_LOGI("app_main", "Tasks started");
 
     vTaskStartScheduler();
+    /* vTaskStartScheduler is blocking - this should never be reached */
+    ESP_LOGE("app_main", "insufficient RAM! aborting");
+    abort();
 }

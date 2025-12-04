@@ -5,6 +5,7 @@ idf_component_register(
         "display.cpp"
         "tasks/exercise2.cpp"
         "trace-hooks/trace-queue.c"
+        "logging/logging.c"
 
     PRIV_REQUIRES 
         spi_flash 
@@ -13,4 +14,5 @@ idf_component_register(
         "." 
         "tasks"
         "trace-hooks/include"
+        "logging"
 )

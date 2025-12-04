@@ -1,39 +1,22 @@
-// #include "trace-queue.h" 
+// #include "trace-queue.h"
+#include "logging/logging.h" 
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
-#include "esp_log.h" 
+// #include "esp_log.h" 
 
-static const char *QUEUE_SEND = "QSend";
-static const char *QUEUE_RECEIVE = "QReceive";
+static const char *QUEUE_SEND = "SEND";
+static const char *QUEUE_RECEIVE = "RECV";
 
-void vQueueSendTrace( void *pxQueue )
+void vQueueSendTrace( QueueHandle_t pxQueue )
 {   
-    const char* task_name = "UNKNOWN";
-
-    if ( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING ) {
-        TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
-    
-        // Check for NULL handle (e.g., if called by an ISR/Timer)
-        if (current_task != NULL) {
-            task_name = pcTaskGetName(current_task);
-        }  
-    }
-    ESP_EARLY_LOGI( QUEUE_SEND, "QUEUE_SEND. Queue Handle: %p\tTimestamp: %lu\tSent by: %s", pxQueue, xTaskGetTickCount(), task_name );
+    // ESP_EARLY_LOGI( QUEUE_SEND, "\tTimestamp: %lu\tSent: ", xTaskGetTickCount() );
+    LogEvent(QUEUE_SEND, ( char* )pxQueue, 0);  // store in buffer
 }
 
-void vQueueReceiveTrace( void *pxQueue )
+void vQueueReceiveTrace( QueueHandle_t pxQueue )
 {   
-    const char* task_name = "UNKNOWN";
+    // ESP_EARLY_LOGI( QUEUE_RECEIVE, "\tTimestamp: %lu\tReceived: ", xTaskGetTickCount() );
+    LogEvent(QUEUE_RECEIVE, ( char* )pxQueue, 0); // store in buffer
 
-    if ( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING ) {
-        TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
-    
-        // Check for NULL handle (e.g., if called by an ISR/Timer)
-        if (current_task != NULL) {
-            task_name = pcTaskGetName(current_task);
-        }  
-    }
-    
-    ESP_EARLY_LOGI( QUEUE_RECEIVE, "QUEUE_RECEIVE. Queue Receive: %p\tTimestamp: %lu\tReceived from: %s", pxQueue, xTaskGetTickCount(), task_name );
 }
