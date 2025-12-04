@@ -332,26 +332,27 @@
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueSendFailedTrace( QueueHandle_t pxQueue );  \
-                vQueueSendFailedTrace( pxQueue );                       \
+                TickType_t waitTicks = xTicksToWait;                    \
+                extern void vQueueSendFailedTrace( QueueHandle_t pxQueue , TickType_t waitTicks );  \
+                vQueueSendFailedTrace( pxQueue, waitTicks );                       \
             }                                                           \
         } while ( 0 )
     
     #define traceQUEUE_SEND_FROM_ISR( pxQueue )                         \
-    do {                                                                \
-        extern QueueHandle_t xitemsQueue;                               \
-        if ( ( pxQueue ) == xitemsQueue ) {                             \
-            extern void vQueueSendFromISRTrace( QueueHandle_t pxQueue );       \
-            vQueueSendFromISRTrace( pxQueue );                                 \
-        }                                                               \
-    } while( 0 )
+        do {                                                                \
+            extern QueueHandle_t xitemsQueue;                               \
+            if ( ( pxQueue ) == xitemsQueue ) {                             \
+                extern void vQueueSendFromISRTrace( QueueHandle_t pxQueue, TickType_t waitTicks );       \
+                vQueueSendFromISRTrace( pxQueue, 0 );                                 \
+            }                                                               \
+        } while( 0 )
 
     #define traceQUEUE_SEND_FROM_ISR_FAILED( pxQueue )                  \
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueSendFromISRFailedTrace( QueueHandle_t pxQueue );  \
-                vQueueSendFromISRFailedTrace( pxQueue );                       \
+                extern void vQueueSendFromISRFailedTrace( QueueHandle_t pxQueue, TickType_t waitTicks );  \
+                vQueueSendFromISRFailedTrace( pxQueue, 0 );                       \
             }                                                           \
         } while ( 0 )
     
@@ -359,8 +360,9 @@
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueReceiveTrace( QueueHandle_t pxQueue );  \
-                vQueueReceiveTrace( pxQueue );                          \
+                TickType_t waitTicks = xTicksToWait;                    \
+                extern void vQueueReceiveTrace( QueueHandle_t pxQueue, TickType_t waitTicks );  \
+                vQueueReceiveTrace( pxQueue, waitTicks );                          \
             }                                                           \
         } while( 0 )
 
@@ -368,8 +370,9 @@
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueReceiveFailedTrace( QueueHandle_t pxQueue );  \
-                vQueueReceiveFailedTrace( pxQueue );                    \
+                TickType_t waitTicks = xTicksToWait;                    \
+                extern void vQueueReceiveFailedTrace( QueueHandle_t pxQueue, TickType_t waitTicks );  \
+                vQueueReceiveFailedTrace( pxQueue, waitTicks );                    \
             }                                                           \
         } while( 0 )
     
@@ -377,8 +380,8 @@
     do {                                                                \
         extern QueueHandle_t xitemsQueue;                               \
         if ( ( pxQueue ) == xitemsQueue ) {                             \
-            extern void vQueueReceiveFromISRTrace( QueueHandle_t pxQueue );       \
-            vQueueReceiveFromISRTrace( pxQueue );                                 \
+            extern void vQueueReceiveFromISRTrace( QueueHandle_t pxQueue, TickType_t waitTicks );       \
+            vQueueReceiveFromISRTrace( pxQueue, 0 );                                 \
         }                                                               \
     } while( 0 )
 
@@ -386,8 +389,8 @@
         do {                                                            \
             extern QueueHandle_t xitemsQueue;                           \
             if ( ( pxQueue ) == xitemsQueue ) {                         \
-                extern void vQueueReceiveFromISRFailedTrace( QueueHandle_t pxQueue );  \
-                vQueueReceiveFromISRFailedTrace( pxQueue );                       \
+                extern void vQueueReceiveFromISRFailedTrace( QueueHandle_t pxQueue, TickType_t waitTicks );  \
+                vQueueReceiveFromISRFailedTrace( pxQueue, 0 );                       \
             }                                                           \
         } while ( 0 )    
 
