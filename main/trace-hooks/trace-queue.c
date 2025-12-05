@@ -5,14 +5,14 @@
 #include "freertos/task.h"
 // #include "esp_log.h" 
 
-static const char *QUEUE_SEND = "SEND";
-static const char *QUEUE_SEND_FAILED = "SEND FAILED";
-static const char *QUEUE_SEND_FROM_ISR = "SEND FROM ISR";
-static const char *QUEUE_SEND_FROM_ISR_FAILED = "SEND FROM ISR FAILED";
-static const char *QUEUE_RECEIVE = "RECV";
-static const char *QUEUE_RECEIVE_FAILED = "RECV FAILED";
-static const char *QUEUE_RECEIVE_FROM_ISR = "RECV FROM ISR";
-static const char *QUEUE_RECEIVE_FROM_ISR_FAILED = "RECV FROM ISR FAILED";
+static const char *QUEUE_SEND = "traceQUEUE_SEND";
+static const char *QUEUE_SEND_FAILED = "traceQUEUE_SEND_FAILED";
+static const char *QUEUE_SEND_FROM_ISR = "traceQUEUE_SEND_FROM_ISR";
+static const char *QUEUE_SEND_FROM_ISR_FAILED = "traceQUEUE_SEND_FROM_ISR_FAILED";
+static const char *QUEUE_RECEIVE = "traceQUEUE_RECEIVE";
+static const char *QUEUE_RECEIVE_FAILED = "traceQUEUE_RECEIVE_FAILED";
+static const char *QUEUE_RECEIVE_FROM_ISR = "traceQUEUE_RECEIVE_FROM_ISR";
+static const char *QUEUE_RECEIVE_FROM_ISR_FAILED = "traceQUEUE_RECEIVE_FROM_ISR_FAILED";
 
 void vQueueSendTrace( QueueHandle_t xQueue, TickType_t tickCount, TickType_t waitTicks, const char* taskName )
 {   

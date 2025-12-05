@@ -45,27 +45,27 @@ void LogFlush(void)
 
         // Use ESP_LOGE for failures
         if ( strstr( e->event, "FAILED" ) != NULL ) {
-            ESP_LOGE( e->event, "%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
-                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, safeTaskName );
+            ESP_LOGE(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u, EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu",
+                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks );
         } 
         else if ( strstr( e->event, "TSK_INCR_TICK") != NULL )
         {
-            ESP_LOGI( e->event, "%lu ticks | %u [us] | task=%s",
-                    e->tickCount, e->microSeconds, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName );
         }
-        else if ( strstr( e->event, "TSK_DLAY") != NULL )
+        else if ( strstr( e->event, "TASK_DELAY") != NULL )
         {
-            ESP_LOGI( e->event, "%lu ticks | wait=%lu ticks | task=%s",
-                    e->tickCount, e->waitTicks, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=%lu",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName, e->waitTicks );
         }
-        else if ( strstr( e->event, "TSK_SWITCH" ) != NULL ) 
+        else if ( strstr( e->event, "TASK_SWITCH" ) != NULL ) 
         {
-            ESP_LOGI( e->event, "%lu ticks | %u [us] | task=%s",
-                    e->tickCount, e->microSeconds, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName );
         }
         else {
-            ESP_LOGI( e->event, "%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
-                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu",
+                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks );
         }
 
         logTail++;
