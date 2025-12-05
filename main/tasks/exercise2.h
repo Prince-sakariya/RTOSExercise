@@ -16,7 +16,7 @@ void startProductionLine1Task();
 void startProductionLine2Task();
 void startProductionLine3Task();
 void startPrintingTask();
-void startTaskTimer();
+void startMasterTask();
 
 // ----------- Task Creation Wrappers -----------
 void produceItemProductionLine1( void* args );

@@ -21,7 +21,7 @@ extern "C" void app_main() {
     createItemsQueue();
 
     // Start Task Timer
-    startTaskTimer();
+    startMasterTask();
 
     // Create the periodic tasks
     startProductionLine1Task();

@@ -41,25 +41,31 @@ void LogFlush(void)
     while (logTail < logHead) {
         uint32_t i = logTail % LOG_BUFFER_SIZE;
         LogEntry_t* e = &logBuffer[ i ];
+        const char* safeTaskName = e->taskName ? e->taskName : "NULL"; 
 
         // Use ESP_LOGE for failures
         if ( strstr( e->event, "FAILED" ) != NULL ) {
             ESP_LOGE( e->event, "%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
-                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
+                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, safeTaskName );
         } 
         else if ( strstr( e->event, "TSK_INCR_TICK") != NULL )
         {
             ESP_LOGI( e->event, "%lu ticks | %u [us] | task=%s",
-                    e->tickCount, e->microSeconds, e->taskName);
+                    e->tickCount, e->microSeconds, safeTaskName );
         }
-        else if ( strstr( e->event, "TASK_DELAY") != NULL )
+        else if ( strstr( e->event, "TSK_DLAY") != NULL )
         {
             ESP_LOGI( e->event, "%lu ticks | wait=%lu ticks | task=%s",
-                    e->tickCount, e->waitTicks, e->taskName);
+                    e->tickCount, e->waitTicks, safeTaskName );
+        }
+        else if ( strstr( e->event, "TSK_SWITCH" ) != NULL ) 
+        {
+            ESP_LOGI( e->event, "%lu ticks | %u [us] | task=%s",
+                    e->tickCount, e->microSeconds, safeTaskName );
         }
         else {
             ESP_LOGI( e->event, "%lu ticks | %u [us] | queue=%p | wait=%lu ticks| task=%s",
-                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, e->taskName );
+                     e->tickCount, e->microSeconds, e->queueHandle, e->waitTicks, safeTaskName );
         }
 
         logTail++;

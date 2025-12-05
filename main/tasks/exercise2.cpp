@@ -195,7 +195,7 @@ void produceItemProductionLine3(void* args) {
 void printItems(void* args) {
     int32_t lReceivedItem;
     BaseType_t xStatus;
-    const TickType_t xTicksToWait = pdMS_TO_TICKS( 50 );
+    const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
     
     // Get item from Queue
     for ( ;; ) {
@@ -249,9 +249,9 @@ void startProductionLine3Task() {
 }
 
 void startPrintingTask() {
-    xTaskCreate( printItems, "printItems", 4096, NULL, 3, &PrintingHandle );
+    xTaskCreate( printItems, "printItems", 4096, NULL, 2, &PrintingHandle );
 }
 
-void startTaskTimer() {
+void startMasterTask() {
     xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 5, NULL );
 }

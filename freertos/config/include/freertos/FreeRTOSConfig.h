@@ -310,3 +310,4 @@
 /* Include trace macro headers */
 #include "queue_tracing.h"
 #include "housekeeping_operations_tracing.h"
+#include "job_execution_tracing.h"

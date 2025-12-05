@@ -4,6 +4,7 @@
 #ifndef __ASSEMBLER__
     #ifdef configUSE_TRACE_FACILITY
         #define configUSE_TRACE_FACILITY        1
+        #define configUSE_POSIX_ERRNO           1
     #endif
     
     #define traceQUEUE_SET_SEND(pxQueueSet) \
