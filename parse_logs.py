@@ -11,7 +11,7 @@ log_pattern = re.compile(
 ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
 
 # CSV file to save trace data
-CSV_FILE = "trace_data.csv"
+CSV_FILE = "log_entries.csv"
 
 # Stats
 total_entries = 0
@@ -21,7 +21,7 @@ timestamps = []
 # Open CSV file and write header
 csv_file = open(CSV_FILE, mode="w", newline="")
 csv_writer = csv.writer(csv_file)
-csv_writer.writerow(["TickCount", "Timestamp_us", "EventType", "Task", "Queue", "TickWait"])
+csv_writer.writerow(["tick", "Timestamp_us", "eventtype", "taskid", "Queue", "TickWait"])
 
 # Start idf_monitor as a subprocess
 process = subprocess.Popen(
