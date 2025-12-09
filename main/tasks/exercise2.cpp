@@ -12,20 +12,23 @@
 #define TASK_BIT_PROD3   (1 << 2)
 #define TASK_BIT_PRINT   (1 << 3)
 
+// How large each message can be
+#define MSG_SIZE 64
+
 TaskHandle_t masterHandle = NULL;
 
 QueueHandle_t xitemsQueue;
-TaskHandle_t ProductionLine1Handle = NULL;
-TaskHandle_t ProductionLine2Handle = NULL;
-TaskHandle_t ProductionLine3Handle = NULL;
-TaskHandle_t PrintingHandle        = NULL;
+TaskHandle_t ProducerHandle1 = NULL;
+TaskHandle_t ProducerHandle2 = NULL;
+TaskHandle_t ProducerHandle3 = NULL;
+TaskHandle_t PrinterHandle = NULL;
 
 // ------------------------------------------------------
 // Queue Creation Wrapper
 // ------------------------------------------------------
 
 void createItemsQueue() {
-    xitemsQueue = xQueueCreate(3, sizeof( int32_t ));
+    xitemsQueue = xQueueCreate(3, sizeof( char [ MSG_SIZE] ));
 }
 
 // ------------------------------------------------------
@@ -37,16 +40,18 @@ void masterTimerStart( void* args ) {
  
     vTaskDelay(pdMS_TO_TICKS(TASK_RUN_TIME));
 
+    
+    // Signal all tasks individually 
+    if (ProducerHandle1)        xTaskNotifyGive(ProducerHandle1);
+    if (ProducerHandle2)        xTaskNotifyGive(ProducerHandle2);
+    if (ProducerHandle3)        xTaskNotifyGive(ProducerHandle3);
+    if (PrinterHandle)        xTaskNotifyGive(PrinterHandle);
+    
+    // Delete the queue AFTER sending stop signals
     QueueHandle_t q = xitemsQueue;
     xitemsQueue = NULL;
     vQueueDelete(q);
 
-    // Signal all tasks individually 
-    if (ProductionLine1Handle) xTaskNotifyGive(ProductionLine1Handle);
-    if (ProductionLine2Handle) xTaskNotifyGive(ProductionLine2Handle);
-    if (ProductionLine3Handle) xTaskNotifyGive(ProductionLine3Handle);
-    if (PrintingHandle)        xTaskNotifyGive(PrintingHandle);
-    
     // Wait for all tasks to confirm shutdown
     uint32_t received = 0;
     while ((received & 0x0F) != 0x0F)   // wait for bits 0–3
@@ -64,170 +69,88 @@ void masterTimerStart( void* args ) {
 }
 
 // ------------------------------------------------------
-// Task: Production Line 1 (0.1s resolution)
+// Task: Producer Task
 // ------------------------------------------------------
-void produceItemProductionLine1(void* args) {
-    const TickType_t period = 100;
-    TickType_t lastWakeTime = xTaskGetTickCount();
-    BaseType_t xStatus;
-    int32_t lItemtoSend1;
-    lItemtoSend1 = 1;
-
-    for (;;) {
-        // Stop request?
-        if (ulTaskNotifyTake(pdTRUE, 0) > 0) 
-        break; // stop signal
-
-        xTaskDelayUntil(&lastWakeTime, period);
-
-        // Stop request again after waking (critical!)
-        if (ulTaskNotifyTake(pdTRUE, 0) > 0)
-            break;
-
-        TickType_t tick = xTaskGetTickCount();
-        if (lastWakeTime + period < tick)
-            ESP_LOGE( "produceItemProductionLine1", "deadline miss at %lu", tick );
-        
-        // Send item to printer
-        // Send item to queue if it exists
-        if (xitemsQueue != NULL) {
-            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend1, pdMS_TO_TICKS( period ) );
-
-            if ( xStatus != pdPASS ) {
-                ESP_LOGE( "produceItemProductionLine1", "Could not send to the queue. Tick: %u\r\n", tick );
-            }
-        }
+void producerTask( void* args ) {
+    const char* name = ( const char * ) args;
+    TickType_t period;
+    uint32_t lDoneBit;
+    // Choose interval based on name
+    if ( strcmp( name, "Line 1") == 0 ) {
+        period = 100;
+        lDoneBit = TASK_BIT_PROD1;
     }
+    else if ( strcmp( name, "Line 2") == 0 ) {
+        period = 200;
+        lDoneBit = TASK_BIT_PROD2;
+    }
+    else {
+        period = 300;
+        lDoneBit = TASK_BIT_PROD3;  
+    } 
 
-    // Notify master we are done
-    xTaskNotify(masterHandle, TASK_BIT_PROD1, eSetBits);  // use correct bit per task
-
-    vTaskDelete(NULL);
-}
-
-// ------------------------------------------------------
-// Task: Production Line 2 (0.2s resolution)
-// ------------------------------------------------------
-void produceItemProductionLine2(void* args) {
-    const TickType_t period = 200;
     TickType_t lastWakeTime = xTaskGetTickCount();
-    BaseType_t xStatus;
-    int32_t lItemtoSend2;
-    lItemtoSend2 = 2;
+    char xItemtoSend[ MSG_SIZE ];
+    
     
     for (;;) {
         // Stop request?
         if (ulTaskNotifyTake(pdTRUE, 0) > 0) 
         break; // stop signal
-
-        xTaskDelayUntil(&lastWakeTime, period);
-
+        
+        
         // Stop request again after waking (critical!)
         if (ulTaskNotifyTake(pdTRUE, 0) > 0)
-            break;
+        break;
 
-        TickType_t tick = xTaskGetTickCount();
-        if (lastWakeTime + period < tick)
-            ESP_LOGE( "produceItemProductionLine2", "deadline miss at %lu", tick );
+        snprintf( xItemtoSend, MSG_SIZE, "%s item produced!", name );
         
+        TickType_t tick = xTaskGetTickCount();
+        if (lastWakeTime + period < tick) 
+        ESP_LOGE( name , "deadline miss at %lu", tick );
+        
+
         // Send item to printer
         // Send item to queue if it exists
-        if (xitemsQueue != NULL) {
-            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend2, pdMS_TO_TICKS( period ) );
-
-            if ( xStatus != pdPASS ) {
-                ESP_LOGE( "produceItemProductionLine2", "Could not send to the queue. Tick: %u\r\n", tick );
+        if ( xitemsQueue ) {
+            if ( xQueueSend( xitemsQueue , &xItemtoSend, pdMS_TO_TICKS( period ) ) != pdPASS) {
+                ESP_LOGE( name , "Could not send to the queue. Tick: %u\r\n", tick );
             }
         }
+        xTaskDelayUntil(&lastWakeTime, period);
     }
 
     // Notify master we are done
-    xTaskNotify(masterHandle, TASK_BIT_PROD2, eSetBits);  // use correct bit per task
+    xTaskNotify(masterHandle, lDoneBit, eSetBits);  // use correct bit per task
 
     vTaskDelete(NULL);
+
 }
 
-// ------------------------------------------------------
-// Task: Production Line 3 (0.3s resolution)
-// ------------------------------------------------------
-void produceItemProductionLine3(void* args) {
-    const TickType_t period = 300;
-    TickType_t lastWakeTime = xTaskGetTickCount();
-    BaseType_t xStatus;
-    int32_t lItemtoSend3;
-    lItemtoSend3 = 3;
-
-    for (;;) {
-        // Stop request?
-        if (ulTaskNotifyTake(pdTRUE, 0) > 0) 
-        break; // stop signal
-
-        xTaskDelayUntil(&lastWakeTime, period);
-
-        // Stop request again after waking (critical!)
-        if (ulTaskNotifyTake(pdTRUE, 0) > 0)
-            break;
-
-        TickType_t tick = xTaskGetTickCount();
-        if (lastWakeTime + period < tick)
-            ESP_LOGE( "produceItemProductionLine3", "deadline miss at %lu", tick );
-        
-        // Send item to printer
-        // Send item to queue if it exists
-        if (xitemsQueue != NULL) {
-            xStatus = xQueueSendToBack( xitemsQueue , &lItemtoSend3, pdMS_TO_TICKS( period ) );
-
-            if ( xStatus != pdPASS ) {
-                ESP_LOGE( "produceItemProductionLine3", "Could not send to the queue. Tick: %u\r\n", tick );
-            }
-        }
-    }
-
-    // Notify master we are done
-    xTaskNotify(masterHandle, TASK_BIT_PROD3, eSetBits);  // use correct bit per task
-
-    vTaskDelete(NULL);
-}
 
 // ------------------------------------------------------
-// Task: Print items
+// Task: Printer Task
 // ------------------------------------------------------
-void printItems(void* args) {
-    int32_t lReceivedItem;
-    BaseType_t xStatus;
+void printerTask(void* args) {
+    char xReceivedItem [ MSG_SIZE ];
     const TickType_t xTicksToWait = pdMS_TO_TICKS( 100 );
-    
+
     // Get item from Queue
     for ( ;; ) {
     
         // stop immediately if requested
         if (ulTaskNotifyTake(pdTRUE, 0) > 0)
             break;
-        
-        TickType_t tick = xTaskGetTickCount();
-        // if ( uxQueueMessagesWaiting( xitemsQueue ) != 0 ) {
-        //     ESP_LOGI( "printItems", "Queue should have been empty!\r\n" );
-        // }
-        
-        // Receive item from queue if it exists
-        if (xitemsQueue != NULL) {
-            xStatus = xQueueReceive(xitemsQueue, &lReceivedItem, xTicksToWait);
-            if ( xStatus != pdPASS ) {
-                // Print on serial console
-                // ESP_LOGI("printItems", "Printing: Item from Production Line %d", lReceivedItem);
-                ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
+
+        // Block indefinitely waiting for new messages
+        if ( xitemsQueue ) {
+            if ( xQueueReceive( xitemsQueue, &xReceivedItem, xTicksToWait ) == pdPASS ) {
+                // ESP_LOGI( "printItems", "Printer output: %s. Tick: %u\r\n", xReceivedItem, tick );
+                continue;
             }
         }
-
-        // check stop again in case we woke because master sent the signal
-        if (ulTaskNotifyTake(pdTRUE, 0) > 0)
-            break;
-
-        // else {
-        //     ESP_LOGE( "printItems", "Could not receive from the queue. Tick: %u\r\n", tick );
-        // }
     }
-    xTaskNotify(masterHandle, TASK_BIT_PRINT, eSetBits);
+    xTaskNotify( masterHandle, TASK_BIT_PRINT, eSetBits );
 
     vTaskDelete(NULL);
 }
@@ -236,22 +159,17 @@ void printItems(void* args) {
 // ------------------------------------------------------
 // Task Creation Wrappers
 // ------------------------------------------------------
-void startProductionLine1Task() {
-    xTaskCreate( produceItemProductionLine1, "ProdLine1", 4096, NULL, 3, &ProductionLine1Handle );
+
+void createProducerTask() {
+    xTaskCreate( producerTask, "Producer1", 4096, ( void *)"Line 1", 5, &ProducerHandle1 );
+    xTaskCreate( producerTask, "Producer2", 4096, ( void *)"Line 2", 5, &ProducerHandle2 );
+    xTaskCreate( producerTask, "Producer3", 4096, ( void *)"Line 3", 5, &ProducerHandle3 );
 }
 
-void startProductionLine2Task() {
-    xTaskCreate( produceItemProductionLine2, "ProdLine2", 4096, NULL, 3, &ProductionLine2Handle );
+void createPrinterTask() {
+    xTaskCreate( printerTask, "PrinterTask", 4096, NULL, 6, &PrinterHandle );
 }
 
-void startProductionLine3Task() {
-    xTaskCreate( produceItemProductionLine3, "ProdLine3", 4096, NULL, 3, &ProductionLine3Handle );
-}
-
-void startPrintingTask() {
-    xTaskCreate( printItems, "printItems", 4096, NULL, 2, &PrintingHandle );
-}
-
-void startMasterTask() {
-    xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 5, NULL );
+void createMasterTask() {
+    xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 7, NULL );
 }

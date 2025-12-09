@@ -3,25 +3,19 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <stdio.h>
 
 // ----------- Tags -------------
 
 // ----------- Timing -----------
-#define TICKS_PER_MS 1000
 #define TASK_RUN_TIME 1000
 
 // ----------- Task Creation Handles -----------
-void startProductionLine1Task();
-void startProductionLine2Task();
-void startProductionLine3Task();
-void startPrintingTask();
-void startMasterTask();
+void createProducerTask();
+void createPrinterTask();
+void createMasterTask();
 
 // ----------- Task Creation Wrappers -----------
-void produceItemProductionLine1( void* args );
-void produceItemProductionLine2( void* args );
-void produceItemProductionLine3( void* args );
+void producerTask( void* args );
 void printItems( void* args );
 void masterTimerStart( void* args );
 

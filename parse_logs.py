@@ -1,6 +1,7 @@
 import re
 import subprocess
 import csv
+import time
 from collections import defaultdict
 
 # Regex pattern matching the log format after the ESP-IDF prefix
@@ -25,7 +26,7 @@ csv_writer.writerow(["tick", "Timestamp_us", "eventtype", "taskid", "Queue", "Ti
 
 # Start idf_monitor as a subprocess
 process = subprocess.Popen(
-    ["idf.py", "monitor"],
+    ["./monitor.sh"],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
     text=True,
@@ -82,3 +83,17 @@ finally:
     print(f"Time span: {time_span_us} us ({time_span_us/1e6:.3f} s)")
     print(f"Trace data saved to {CSV_FILE}")
     print("Exiting parser.")
+
+    # Launch visualization script
+    try: 
+        print("Launching visualization script ...")
+        proc = subprocess.Popen(["python3", "./visualize.py"])
+        # Wait for some time
+        time.sleep(2)  # 2 seconds
+        
+        # Terminate the process cleanly
+        proc.terminate()  # send SIGTERM
+        proc.wait(timeout=5)  # wait for process to exit
+        print("Visualization script terminated.")
+    except Exception as e:
+        print(f"Failed to launch visualize.py: {e}")
