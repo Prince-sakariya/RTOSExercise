@@ -1,4 +1,6 @@
-# Exercise for Real-Time Operating Systems Design and Implementation 25/26
+# The Project Debug tool is created by Prince Sakariya 2800037. 
+This repository is forked. It is **important** to clone this forked repository as the original repository, does **not** include logging, trace macro override, etc. 
+
 In order to use the setup you will need to configure your system in the following way:
 
 1. Install the required system packages and configure your system accordingly
