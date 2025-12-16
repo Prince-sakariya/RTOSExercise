@@ -6,7 +6,7 @@ from collections import defaultdict
 
 # Regex pattern matching the log format after the ESP-IDF prefix
 log_pattern = re.compile(
-    r"TickCount\(ticks\)=(\d+), Timestamp\(us\)=(\d+)\s*, EventType=(\S+), Task=(\S+), Queue=(\S+), TickWait\(ticks\)=(\S+)"
+    r"TickCount\(ticks\)=(\d+), Timestamp\(us\)=(\d+)\s*, EventType=(\S+), Task=(\S+), Queue=(\S+), TickWait\(ticks\)=(\S+), CoreID=(\d+)"
 )
 # Regex to remove ANSI escape codes
 ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
@@ -54,17 +54,23 @@ try:
             event = match.group(3)
             task = match.group(4)
             queue = match.group(5)
+            if queue in ["0x0", "NULL", "0"]:
+                queue = "None"
             wait = match.group(6)
+            core_id = match.group(7)
 
             timestamps.append(ts)
             event_counts[event] += 1
 
+            # Append CoreID to the task name to create separate rows for Core 0 and Core 1
+            task_with_core = f"{match.group(4)}_C{core_id}"
+            
             # Write row to CSV
             csv_writer.writerow([tick, ts, event, task, queue, wait])
             csv_file.flush()  # make sure it's written immediately
 
             # Optional: print parsed log line
-            print(f"{tick} ticks | {ts} us | Event: {event} | Task: {task} | Queue: {queue} | Wait: {wait}")
+            print(f"{tick} ticks | {ts} us | Event: {event} | Task: {task} | Queue: {queue} | Wait: {wait}| Core: {task_with_core}")
 
 except KeyboardInterrupt:
     print("Interrupted by user.")

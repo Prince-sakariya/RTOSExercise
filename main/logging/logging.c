@@ -19,7 +19,7 @@ void Log_Init( void )
 }
 
 // Core logging function
-void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName )
+void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName, int coreID )
 {
     uint32_t i = logHead % LOG_BUFFER_SIZE;
     logBuffer[ i ].event = event;
@@ -28,6 +28,7 @@ void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, Tic
     logBuffer[ i ].queueHandle = queue;
     logBuffer[ i ].waitTicks = waitTicks;
     logBuffer[ i ].taskName = taskName;
+    logBuffer[ i ].coreID = coreID;
 
     logHead++;
     if (logHead - logTail > LOG_BUFFER_SIZE) {
@@ -45,27 +46,27 @@ void LogFlush(void)
 
         // Use ESP_LOGE for failures
         if ( strstr( e->event, "FAILED" ) != NULL ) {
-            ESP_LOGE(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u, EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu",
-                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks );
+            ESP_LOGE(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u, EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu, CoreID=%d",
+                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks, e->coreID );
         } 
         else if ( strstr( e->event, "TSK_INCR_TICK") != NULL )
         {
-            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL",
-                    e->tickCount, e->microSeconds, e->event, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL, CoreID=%d",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName, e->coreID );
         }
         else if ( strstr( e->event, "TASK_DELAY") != NULL )
         {
-            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=%lu",
-                    e->tickCount, e->microSeconds, e->event, safeTaskName, e->waitTicks );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=%lu, CoreID=%d",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName, e->waitTicks, e->coreID );
         }
         else if ( strstr( e->event, "TASK_SWITCH" ) != NULL ) 
         {
-            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL",
-                    e->tickCount, e->microSeconds, e->event, safeTaskName );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=NULL, TickWait(ticks)=NULL, CoreID=%d",
+                    e->tickCount, e->microSeconds, e->event, safeTaskName, e->coreID );
         }
         else {
-            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu",
-                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks );
+            ESP_LOGI(LOG_TAG, "TickCount(ticks)=%lu, Timestamp(us)=%u , EventType=%s, Task=%s, Queue=%p, TickWait(ticks)=%lu, CoreID=%d",
+                     e->tickCount, e->microSeconds, e->event, safeTaskName, e->queueHandle, e->waitTicks, e->coreID );
         }
 
         logTail++;

@@ -28,7 +28,7 @@ TaskHandle_t PrinterHandle = NULL;
 // ------------------------------------------------------
 
 void createItemsQueue() {
-    xitemsQueue = xQueueCreate(1, sizeof( char [ MSG_SIZE] ));
+    xitemsQueue = xQueueCreate(4, sizeof( char [ MSG_SIZE] ));
 }
 
 // ------------------------------------------------------
@@ -85,7 +85,7 @@ void producerTask( void* args ) {
         period = pdMS_TO_TICKS( 200 );
         lDoneBit = TASK_BIT_PROD2;
     }
-    else {
+    else if ( strcmp( name, "Line 3") == 0 ) {
         period = pdMS_TO_TICKS( 300 );
         lDoneBit = TASK_BIT_PROD3;  
     } 
@@ -172,5 +172,5 @@ void createPrinterTask() {
 }
 
 void createMasterTask() {
-    xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 7, &masterHandle );
+    xTaskCreate( masterTimerStart, "masterTimer", 4096, NULL, 7, &masterHandle );
 }

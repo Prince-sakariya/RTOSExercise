@@ -14,8 +14,8 @@
     TRACE_IF_ENABLED( \
             TaskHandle_t _t = pxCurrentTCBs[ portGET_CORE_ID() ]; \
             const char* taskName = (_t != NULL) ? pcTaskGetName(_t) : "NULL"; \
-            extern void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName ); \
-            LogEvent( "traceTASK_SWITCHED_IN", xTaskGetTickCount(), NULL, 0, taskName );  \
+            extern void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName, int coreID ); \
+            LogEvent( "traceTASK_SWITCHED_IN", xTaskGetTickCount(), NULL, 0, taskName, portGET_CORE_ID() );  \
         )
     
     // -------- TASK SWITCH OUT ----------
@@ -23,8 +23,8 @@
         TRACE_IF_ENABLED( \
             TaskHandle_t _t = pxCurrentTCBs[ portGET_CORE_ID() ]; \
             const char* taskName = (_t != NULL) ? pcTaskGetName(_t) : "NULL"; \
-            extern void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName ); \
-            LogEvent( "traceTASK_SWITCHED_OUT", xTaskGetTickCount(), NULL, 0, taskName );  \
+            extern void LogEvent( const char *event, TickType_t tickCount, QueueHandle_t queue, TickType_t waitTicks, const char* taskName, int coreID ); \
+            LogEvent( "traceTASK_SWITCHED_OUT", xTaskGetTickCount(), NULL, 0, taskName, portGET_CORE_ID() );  \
         )
 
 #endif /* def __ASSEMBLER__ */

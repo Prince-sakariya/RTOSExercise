@@ -14,6 +14,7 @@ typedef struct {
     QueueHandle_t queueHandle;         // Queue (handle) pointer 
     TickType_t waitTicks;      // Max ticks the task will wait
     const char* taskName;      // Calling task name
+    int coreID;                // Core id 0/1
 } LogEntry_t;
 
 // ------------------ Logging Flag -----------------
@@ -29,7 +30,8 @@ void LogEvent(
     TickType_t tickCount, 
     QueueHandle_t pxQueue, 
     TickType_t waitTicks, 
-    const char* taskName 
+    const char* taskName, 
+    int coreID
 );
 
 void LogFlush(void);
