@@ -27,4 +27,4 @@ If you use macOS, see the [Setup macOS](#setup-macOS) section below for required
 
 
 ## Logging
-Now you can use logs and visualise your programs timing diagram. To learn how, see [user guide](/RTOSExercise/USER_GUIDE.md).
+Now you can use logs and visualise your programs timing diagram. To learn how, see [user guide](/USER_GUIDE.md).
