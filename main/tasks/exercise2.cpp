@@ -28,7 +28,7 @@ TaskHandle_t PrinterHandle = NULL;
 // ------------------------------------------------------
 
 void createItemsQueue() {
-    xitemsQueue = xQueueCreate(3, sizeof( char [ MSG_SIZE] ));
+    xitemsQueue = xQueueCreate(1, sizeof( char [ MSG_SIZE] ));
 }
 
 // ------------------------------------------------------
@@ -38,7 +38,7 @@ void createItemsQueue() {
 void masterTimerStart( void* args ) {
     masterHandle = xTaskGetCurrentTaskHandle();
  
-    vTaskDelay(pdMS_TO_TICKS(TASK_RUN_TIME));
+    vTaskDelay( pdMS_TO_TICKS( TASK_RUN_TIME ) );
 
     
     // Signal all tasks individually 
@@ -47,11 +47,7 @@ void masterTimerStart( void* args ) {
     if (ProducerHandle3)        xTaskNotifyGive(ProducerHandle3);
     if (PrinterHandle)        xTaskNotifyGive(PrinterHandle);
     
-    // Delete the queue AFTER sending stop signals
-    QueueHandle_t q = xitemsQueue;
-    xitemsQueue = NULL;
-    vQueueDelete(q);
-
+    
     // Wait for all tasks to confirm shutdown
     uint32_t received = 0;
     while ((received & 0x0F) != 0x0F)   // wait for bits 0–3
@@ -61,6 +57,11 @@ void masterTimerStart( void* args ) {
         received |= val;
     }
     
+    // Delete the queue AFTER sending stop signals
+    QueueHandle_t q = xitemsQueue;
+    xitemsQueue = NULL;
+    if (q) vQueueDelete(q);
+
     xLoggingEnabled = 0; // <- Stop logging
     LogFlush();
     ESP_LOGI("MASTER", "All tasks stopped. Queue deleted. Log successfully flushed!");
@@ -77,15 +78,15 @@ void producerTask( void* args ) {
     uint32_t lDoneBit;
     // Choose interval based on name
     if ( strcmp( name, "Line 1") == 0 ) {
-        period = 100;
+        period = pdMS_TO_TICKS( 100 );
         lDoneBit = TASK_BIT_PROD1;
     }
     else if ( strcmp( name, "Line 2") == 0 ) {
-        period = 200;
+        period = pdMS_TO_TICKS( 200 );
         lDoneBit = TASK_BIT_PROD2;
     }
     else {
-        period = 300;
+        period = pdMS_TO_TICKS( 300 );
         lDoneBit = TASK_BIT_PROD3;  
     } 
 
@@ -97,7 +98,8 @@ void producerTask( void* args ) {
         // Stop request?
         if (ulTaskNotifyTake(pdTRUE, 0) > 0) 
         break; // stop signal
-        
+
+        vTaskDelayUntil( &lastWakeTime, period );
         
         // Stop request again after waking (critical!)
         if (ulTaskNotifyTake(pdTRUE, 0) > 0)
@@ -113,11 +115,10 @@ void producerTask( void* args ) {
         // Send item to printer
         // Send item to queue if it exists
         if ( xitemsQueue ) {
-            if ( xQueueSend( xitemsQueue , &xItemtoSend, pdMS_TO_TICKS( period ) ) != pdPASS) {
+            if ( xQueueSend( xitemsQueue , &xItemtoSend, period ) != pdPASS) {
                 ESP_LOGE( name , "Could not send to the queue. Tick: %u\r\n", tick );
             }
         }
-        xTaskDelayUntil(&lastWakeTime, period);
     }
 
     // Notify master we are done
@@ -171,5 +172,5 @@ void createPrinterTask() {
 }
 
 void createMasterTask() {
-    xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 7, NULL );
+    xTaskCreate( masterTimerStart, "masterTimerStart", 4096, NULL, 7, &masterHandle );
 }
