@@ -24,3 +24,7 @@ If you use macOS, see the [Setup macOS](#setup-macOS) section below for required
 - Make sure the [required dependencies](https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/get-started/linux-macos-setup.html#for-macos-users) are installed. If you use HomeBrew, they can be installed with:
   `brew install cmake ninja dfu-util`
 - You need a Python 3 interpreter, for example, you can use the bundled Python 3.9 interpreter (on macOS Sonoma). If your bundled Python version is Python 2, [install a Python 3 interpreter](https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/get-started/linux-macos-setup.html#installing-python-3), for example with HomeBrew.
+
+
+## Logging
+Now you can use logs and visualise your programs timing diagram. To learn how, see [user guide](/RTOSExercise/USER_GUIDE.md).
