@@ -6,10 +6,10 @@
 #include <GxEPD2_BW.h>
 
 // ----------- GPIO Pins -----------
-#define BOTTOM_LEFT     26
-#define TOP_LEFT        25
-#define BOTTOM_RIGHT    4
-#define TOP_RIGHT       35
+#define BOTTOM_LEFT     GPIO_NUM_26
+#define TOP_LEFT        GPIO_NUM_25
+#define BOTTOM_RIGHT    GPIO_NUM_4
+#define TOP_RIGHT       GPIO_NUM_35
 #define DISPLAY_CS      5
 #define DISPLAY_RES     9
 #define DISPLAY_DC      10

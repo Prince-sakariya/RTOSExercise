@@ -292,7 +292,10 @@ _Static_assert( tskNO_AFFINITY == ( BaseType_t ) CONFIG_FREERTOS_NO_AFFINITY, "C
                                                 UBaseType_t uxPriority,
                                                 StackType_t * const puxStackBuffer,
                                                 StaticTask_t * const pxTaskBuffer,
-                                                const BaseType_t xCoreID )
+                                                const BaseType_t xCoreID,
+                                                uint32_t period,
+                                                uint32_t worstCaseExecutionTime,
+                                                uint32_t relativeDeadline)
     {
         TaskHandle_t xReturn;
 
@@ -361,8 +364,11 @@ _Static_assert( tskNO_AFFINITY == ( BaseType_t ) CONFIG_FREERTOS_NO_AFFINITY, "C
                 }
                 #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
-                prvInitialiseNewTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, &xReturn, pxNewTCB, NULL, xCoreID );
+                prvInitialiseNewTask( pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, &xReturn, pxNewTCB, NULL, xCoreID, period, worstCaseExecutionTime, relativeDeadline);
                 prvAddNewTaskToReadyList( pxNewTCB );
+                pxNewTCB->period = period;
+                pxNewTCB->worstCaseExecutionTime = worstCaseExecutionTime;
+                pxNewTCB->relativeDeadline = relativeDeadline;
             }
             else
             {

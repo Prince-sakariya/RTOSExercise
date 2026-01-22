@@ -426,6 +426,10 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     ListItem_t xEventListItem;                  /*< Used to reference a task from an event list. */
     UBaseType_t uxPriority;                     /*< The priority of the task.  0 is the lowest priority. */
     StackType_t * pxStack;                      /*< Points to the start of the stack. */
+    // realize periodic tasks
+    uint32_t period;
+    uint32_t worstCaseExecutionTime;
+    uint32_t relativeDeadline;
     char pcTaskName[ configMAX_TASK_NAME_LEN ]; /*< Descriptive name given to the task when created.  Facilitates debugging only. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
     #if ( configNUMBER_OF_CORES > 1 )
@@ -789,6 +793,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions,
+                                  uint32_t period,
+                                  uint32_t worstCaseExecutionTime,
+                                  uint32_t relativeDeadline,
                                   BaseType_t xCoreID ) PRIVILEGED_FUNCTION;
 
 /*
@@ -1017,6 +1024,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                                   TaskHandle_t * const pxCreatedTask,
                                   TCB_t * pxNewTCB,
                                   const MemoryRegion_t * const xRegions,
+                                  uint32_t period,
+                                  uint32_t worstCaseExecutionTime,
+                                  uint32_t relativeDeadline,
                                   BaseType_t xCoreID )
 {
     StackType_t * pxTopOfStack;
@@ -1146,6 +1156,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     /* Event lists are always in priority order. */
     listSET_LIST_ITEM_VALUE( &( pxNewTCB->xEventListItem ), ( TickType_t ) configMAX_PRIORITIES - ( TickType_t ) uxPriority ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
     listSET_LIST_ITEM_OWNER( &( pxNewTCB->xEventListItem ), pxNewTCB );
+
+    /* Store real-time scheduling parameters in the TCB */
+    pxNewTCB->period = period;
+    pxNewTCB->worstCaseExecutionTime = worstCaseExecutionTime;
+    pxNewTCB->relativeDeadline = relativeDeadline;
 
     #if ( portUSING_MPU_WRAPPERS == 1 )
     {
@@ -2330,6 +2345,9 @@ static BaseType_t prvCreateIdleTasks( void )
             StaticTask_t * pxIdleTaskTCBBuffer = NULL;
             StackType_t * pxIdleTaskStackBuffer = NULL;
             uint32_t ulIdleTaskStackSize;
+            uint32_t period = 0;
+            uint32_t worstCaseExecutionTime = 0;
+            uint32_t relativeDeadline = 0;
 
             /* The Idle task is created using user provided RAM - obtain the
              * address of the RAM then create the idle task. */
@@ -2345,7 +2363,10 @@ static BaseType_t prvCreateIdleTasks( void )
                                                                         portPRIVILEGE_BIT,   /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
                                                                         pxIdleTaskStackBuffer,
                                                                         pxIdleTaskTCBBuffer, /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
-                                                                        xCoreID );
+                                                                        xCoreID,
+                                                                        period,
+                                                                        worstCaseExecutionTime,
+                                                                        relativeDeadline);
 
             if( xIdleTaskHandle[ xCoreID ] != NULL )
             {
