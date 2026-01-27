@@ -105,10 +105,7 @@
                                                 UBaseType_t uxPriority,
                                                 StackType_t * const puxStackBuffer,
                                                 StaticTask_t * const pxTaskBuffer,
-                                                const BaseType_t xCoreID,
-                                                uint32_t period,
-                                                uint32_t worstCaseExecutionTime,
-                                                uint32_t relativeDeadline
+                                                const BaseType_t xCoreID
                                              );
 
 #endif /* configSUPPORT_STATIC_ALLOCATION */

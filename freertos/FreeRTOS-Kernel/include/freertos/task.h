@@ -522,10 +522,7 @@ typedef enum
                                                            UBaseType_t uxPriority,
                                                            StackType_t * const pxStackBuffer,
                                                            StaticTask_t * const pxTaskBuffer,
-                                                           const BaseType_t xCoreID,
-                                                           uint32_t period,
-                                                           uint32_t worstCaseExecutionTime,
-                                                           uint32_t relativeDeadline
+                                                           const BaseType_t xCoreID
                                                         );
 
         /*
@@ -539,10 +536,7 @@ typedef enum
                                               uxPriority,
                                               puxStackBuffer,
                                               pxTaskBuffer,
-                                              tskNO_AFFINITY,
-                                              0,
-                                              0,
-                                              0
+                                              tskNO_AFFINITY
                                              );
     }
 #endif /* configSUPPORT_STATIC_ALLOCATION */
