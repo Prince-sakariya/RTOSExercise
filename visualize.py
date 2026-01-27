@@ -86,7 +86,7 @@ def plot_extended_schedule(df: pd.DataFrame, output_name: str):
     # Sort task_ids by the numeric part of the task name (assuming task_id is like 'J1', 'J2', etc.)
     task_ids = sorted(task_ids, key=lambda x: int(re.search(r'(\d+)', x).group()))
     task_ids.reverse()
-    
+
     for i, task_id in enumerate(task_ids):
         # Baseline
         ax.axhline(y=i, color='black', linewidth=0.5, alpha=0.3)
@@ -111,10 +111,10 @@ def plot_extended_schedule(df: pd.DataFrame, output_name: str):
 
         # Trace Task Switch In/Out
         switched_in = task_df[task_df['eventtype'] == 'traceTASK_SWITCHED_IN']
-        ax.scatter(switched_in['Timestamp_us'], [i+0.3]*len(switched_in), marker='v', color='blue', s=80, zorder=4, label="Task Switched In")
+        ax.scatter(switched_in['Timestamp_us'], [i+0.3]*len(switched_in), marker='^', color='blue', s=80, zorder=4, label="Task Switched In")
 
         switched_out = task_df[task_df['eventtype'] == 'traceTASK_SWITCHED_OUT']
-        ax.scatter(switched_out['Timestamp_us'], [i+0.3]*len(switched_out), marker='^', color='purple', s=80, zorder=4, label="Task Switched Out")
+        ax.scatter(switched_out['Timestamp_us'], [i+0.3]*len(switched_out), marker='v', color='purple', s=80, zorder=4, label="Task Switched Out")
         
         # Queue Operations
         queue_send = task_df[task_df['eventtype'] == 'traceQUEUE_SEND']
@@ -140,6 +140,7 @@ def plot_extended_schedule(df: pd.DataFrame, output_name: str):
         # delay = task_df[task_df['eventtype'] == 'traceTASK_DELAY']
         # ax.scatter(delay['Timestamp_us'], [i+0.7]*len(delay), marker='s', color='yellow', s=50, zorder=4, label="Task Delayed")
 
+
     # Global Tick Increments (Vertical Lines)
     tick_inc = df[df['eventtype'] == 'traceTASK_INCREMENT_TICK']['Timestamp_us']
     for t in tick_inc:
@@ -155,16 +156,16 @@ def plot_extended_schedule(df: pd.DataFrame, output_name: str):
         #        markerfacecolor='green', markeredgecolor='green', markersize=10),
         # Line2D([0], [0], marker='o', color='w', label='Task Create Failed',
         #        markerfacecolor='orange', markeredgecolor='orange', markersize=10),
-        Line2D([0], [0], marker='v', color='w', label='Task Switched In',
+        Line2D([0], [0], marker='^', color='w', label='Task Switched In',
                markerfacecolor='blue', markeredgecolor='blue', markersize=10),
-        Line2D([0], [0], marker='^', color='w', label='Task Switched Out',
+        Line2D([0], [0], marker='v', color='w', label='Task Switched Out',
                markerfacecolor='purple', markeredgecolor='purple', markersize=10),
-        Line2D([0], [0], marker='d', color='w', label='Queue Sent',
+        Line2D([0], [0], marker='d', color='w', label='Semaphore Give',
                markerfacecolor='blue', markeredgecolor='blue', markersize=8),
         # Line2D([0], [0], marker='d', color='w', label='Queue Send Failed',
         #        markerfacecolor='red', markeredgecolor='red', markersize=8),
-        Line2D([0], [0], marker='s', color='w', label='Queue Received',
-               markerfacecolor='green', markeredgecolor='green', markersize=8),
+        # Line2D([0], [0], marker='s', color='w', label='Queue Received',
+        #        markerfacecolor='green', markeredgecolor='green', markersize=8),
         # Line2D([0], [0], marker='s', color='w', label='Queue Receive Failed',
         #        markerfacecolor='red', markeredgecolor='red', markersize=8),
         # Line2D([0], [0], marker='*', color='w', label='Queue Send from ISR',

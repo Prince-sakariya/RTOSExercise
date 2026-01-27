@@ -13,11 +13,6 @@ TaskHandle_t xJ1Handle = NULL;
 TaskHandle_t xJ2Handle = NULL;
 TaskHandle_t xJ3Handle = NULL;
 
-// Pointer to track who currently holds the binary semaphore
-volatile TaskHandle_t xResourceOwner = NULL; 
-
-// Manually track the priority of the task holding the semaphore
-volatile UBaseType_t xResourceOwnerOriginalPriority = 0;
 
 void vNormalExecution(void)
 {
@@ -75,16 +70,16 @@ void vJ1(void *pvParameters) {
 
     for(;;) {
         vNormalExecution();
-
         // Take semphore and handle priority inversion
         if (xSemaphoreTake(xResource, portMAX_DELAY) == pdTRUE) {
-            
+
             // Critical section
             vCriticalExecution(9000);
             
             xSemaphoreGive(xResource);
             
         }
+
         vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1.25));
     }
 }
@@ -92,7 +87,7 @@ void vJ1(void *pvParameters) {
 // Define the task that will stop logging after 100 ticks
 void vStopLoggingTask(void *pvParameters) {
     // Wait for 10 ticks
-    vTaskDelay(pdMS_TO_TICKS(5)); // 10 ticks delay
+    vTaskDelay(pdMS_TO_TICKS(3.7)); // 10 ticks delay
 
     // Stop logging by setting xLoggingEnabled to 0
     xLoggingEnabled = 0;
@@ -132,15 +127,20 @@ extern "C" void app_main() {
     // Resource Sharing
     /*--------------------------------------------------------------------*/
 
-    // Note: Use Binary Semaphore to allow manual priority manipulation
+    // Note: Use Binary Semaphore to see priority inversion
     xResource = xSemaphoreCreateBinary();
     xSemaphoreGive(xResource);
+    
+    // PIP, already implemented in mutexes in freertos
+    // xResource = xSemaphoreCreateMutex();
+
+
 
     Log_Init();
     xLoggingEnabled = 1; // <-- Start logging
     
-    xTaskCreate(vJ3,  "J3",  4096, NULL, PRIORITY_LOW,  &xJ1Handle);
-    xTaskCreate(vJ2,  "J2",  4096, NULL, PRIORITY_MID, &xJ1Handle);
+    xTaskCreate(vJ3,  "J3",  4096, NULL, PRIORITY_LOW,  &xJ3Handle);
+    xTaskCreate(vJ2,  "J2",  4096, NULL, PRIORITY_MID, &xJ2Handle);
     xTaskCreate(vJ1, "J1", 4096, NULL, PRIORITY_HIGH, &xJ1Handle);
     xTaskCreate(vStopLoggingTask, "Logger", 4096, NULL, 5, NULL);
 
