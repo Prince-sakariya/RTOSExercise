@@ -25,63 +25,33 @@ void vNormalExecution(void)
     int i;
 
     // Loop from 0 to 1000
-    for (i = 0; i <= 1000; i++) {
+    for (i = 0; i <= 4000; i++) {
     }
 }
 
-void vCriticalExecution(void)
+void vCriticalExecution(int amount)
 {
     // Variable for loop
     int i;
 
     // Loop from 0 to 1000
-    for (i = 0; i <= 17500; i++) {
-    }
-}
-
-// Custom Priority Inversion Protocol
-void vHandlePriorityInversion(void) {
-    if (xResourceOwner != NULL) {
-        UBaseType_t currentOwnerPriority = uxTaskPriorityGet(xResourceOwner);
-        TaskHandle_t currentTaskHandle = xTaskGetCurrentTaskHandle();
-        UBaseType_t currentTaskPriority = uxTaskPriorityGet(currentTaskHandle);
-
-        // If the current task has higher priority than the owner, we need to handle priority inversion
-        if (currentTaskPriority > currentOwnerPriority) {
-            // Invert priority: temporarily set the priority of the resource owner to the current task's priority
-            xResourceOwnerOriginalPriority = currentOwnerPriority;
-            vTaskPrioritySet(xResourceOwner, currentTaskPriority);
-        }
-    }
-}
-
-// Restore the original priority of the task that holds the semaphore
-void vRestoreOriginalPriority(void) {
-    if (xResourceOwner != NULL && xResourceOwnerOriginalPriority != 0) {
-        vTaskPrioritySet(xResourceOwner, xResourceOwnerOriginalPriority);
-        xResourceOwnerOriginalPriority = 0;
+    for (i = 0; i <= amount; i++) {
     }
 }
 
 void vJ3(void *pvParameters) {
     TickType_t lastWakeTime = xTaskGetTickCount();
-    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1));
+    // vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(0.4));
 
     for(;;) {
         vNormalExecution();
 
         // Take semphore and handle priority inversion
         if (xSemaphoreTake(xResource, portMAX_DELAY) == pdTRUE) {
-            xResourceOwner = xTaskGetCurrentTaskHandle();
-            vHandlePriorityInversion();
 
             // Critical Section
-            vCriticalExecution();
+            vCriticalExecution(37000);
 
-            // Restore the original priority
-            vRestoreOriginalPriority();
-
-            xResourceOwner = NULL; 
             xSemaphoreGive(xResource);
             
         }
@@ -91,44 +61,38 @@ void vJ3(void *pvParameters) {
 
 void vJ2(void *pvParameters) {
     TickType_t lastWakeTime = xTaskGetTickCount();
-    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(4));
+    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(2));
 
     for(;;) {
         vNormalExecution();        
-        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(4));
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1.5));
     }
 }
 
 void vJ1(void *pvParameters) {
     TickType_t lastWakeTime = xTaskGetTickCount();
-    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(2));
+    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1));
 
     for(;;) {
         vNormalExecution();
 
         // Take semphore and handle priority inversion
         if (xSemaphoreTake(xResource, portMAX_DELAY) == pdTRUE) {
-            xResourceOwner = xTaskGetCurrentTaskHandle();
-            vHandlePriorityInversion(); // Handle priority inversion before entering critical section
             
             // Critical section
-            vCriticalExecution();
+            vCriticalExecution(9000);
             
-            // Restore the original priority
-            vRestoreOriginalPriority();
-            
-            xResourceOwner = NULL;
             xSemaphoreGive(xResource);
             
         }
-        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(2));
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1.25));
     }
 }
 
 // Define the task that will stop logging after 100 ticks
 void vStopLoggingTask(void *pvParameters) {
-    // Wait for 1000 ticks (assumes tick rate is set to 1000 Hz or 1ms per tick)
-    vTaskDelay(pdMS_TO_TICKS(10)); // 20 ticks delay
+    // Wait for 10 ticks
+    vTaskDelay(pdMS_TO_TICKS(5)); // 10 ticks delay
 
     // Stop logging by setting xLoggingEnabled to 0
     xLoggingEnabled = 0;
@@ -151,24 +115,17 @@ extern "C" void app_main() {
     // LogFlush();
 
     /*--------------------------------------------------------------------*/
-    // Exercise 2 / Project
-    /*--------------------------------------------------------------------*/
-    
+    // Exercise 2 / Project 
     // Log_Init();
     // xLoggingEnabled = 1; // <-- Start logging
- 
     // // Create the items Queue
     // createItemsQueue();
-
     // // Start Task Timer
     // createMasterTask();
-
     // // Create the periodic tasks
     // createProducerTask();
-
     // // Start Printer
     // createPrinterTask();
-
     // ESP_LOGI("app_main", "Tasks started");
 
     /*--------------------------------------------------------------------*/
