@@ -31,7 +31,7 @@ typedef struct {
     uint32_t ulValue;                         // Data to process
 } xAperiodicRequest_t;
 
-// Task to generate aperiodic tasks
+// Task to generate aperiodic tasks 
 void vAperiodicRequestGeneratorTask( void *pvParameters ) {
     xAperiodicRequest_t xRequest;
 
@@ -47,26 +47,26 @@ void vAperiodicRequestGeneratorTask( void *pvParameters ) {
         // Send to the ready queue
         if (xQueueSendToBack(xAperiodicReadyQueue, &xRequest, 0) == pdPASS) {
             // If the request is enqueued, release the semaphore to wake up the task
-            xSemaphoreGive(xAperiodicTaskSemaphore);
+            // xSemaphoreGive(xAperiodicTaskSemaphore);
+            continue;
         }
 
     }
 }
 
-// Aperiodic Worker Task
-void vAperiodicRequestExecutorTask(void *pvParameters) {
-    xAperiodicRequest_t xReceivedRequest;
-
-    for(;;) {
-        // Block until something arrives in the ready queue
-        if (xQueueReceive(xAperiodicReadyQueue, &xReceivedRequest, portMAX_DELAY) == pdPASS) {
-            // Execute the function passed in the structure
-            xReceivedRequest.vAperiodicWorkerTask(xReceivedRequest.ulValue);
-            // After execution, the task should be blocked until a new request arrives
-            xSemaphoreTake(xAperiodicTaskSemaphore, portMAX_DELAY);
-        }
-    }
-}
+// Aperiodic Worker Task (Not a periodic task) (relavant for only tasks a and b)
+// void vAperiodicRequestExecutorTask(void *pvParameters) {
+//     xAperiodicRequest_t xReceivedRequest;
+//     for(;;) {
+//         // Block until something arrives in the ready queue
+//         if (xQueueReceive(xAperiodicReadyQueue, &xReceivedRequest, portMAX_DELAY) == pdPASS) {
+//             // Execute the function passed in the structure
+//             xReceivedRequest.vAperiodicWorkerTask(xReceivedRequest.ulValue);
+//             // After execution, the task should be blocked until a new request arrives
+//             xSemaphoreTake(xAperiodicTaskSemaphore, portMAX_DELAY);
+//         }
+//     }
+// }
 
 /***********************************************************************************/
                     /* Task B: Ready Queue for Apperiodic Requests */
@@ -86,21 +86,26 @@ void vSetupAperiodicTasksReadyQueue(void) {
 /***********************************************************************************/
                     /* Task C Periodic Task (Executes Apperiodic Request) */
 /***********************************************************************************/
+
 // Periodic Task to handle aperiodic requests from the ready queue
-// void vPeriodicExecutorTask(void *pvParameters) {
-//     const TickType_t xPeriod = pdMS_TO_TICKS(100); // Period: 100 ms
-//     TickType_t xLastWakeTime = xTaskGetTickCount();
-//     xAperiodicRequest_t xReceivedRequest;
-//     for(;;) {
-//         // Wait until the next cycle
-//         vTaskDelayUntil(&xLastWakeTime, xPeriod);
-//         // Process all available requests in FIFO order
-//         while (xQueueReceive(xAperiodicReadyQueue, &xReceivedRequest, 0) == pdPASS) {
-//             // Execute the function
-//             xReceivedRequest.vAperiodicWorkerTask(xReceivedRequest.ulValue);
-//         }
-//     }
-// }
+void vPeriodicExecutorTask(void *pvParameters) {
+    const TickType_t xPeriod = pdMS_TO_TICKS(100); // Period: 100 ms
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    xAperiodicRequest_t xReceivedRequest;
+
+    for(;;) {
+        // Wait until the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xPeriod);
+        // Process all available requests in FIFO order
+        while (xQueueReceive(xAperiodicReadyQueue, &xReceivedRequest, 0) == pdPASS) {
+            // Execute the function
+            xReceivedRequest.vAperiodicWorkerTask(xReceivedRequest.ulValue);
+            // After execution, the task should be blocked until a new request arrives
+            // xSemaphoreTake(xAperiodicTaskSemaphore, portMAX_DELAY);
+            vComputation(1);
+        }
+    }
+}
 
 // BaseType_t xSubmitAperiodicRequest(vAperiodicFunction_t xFunc, uint32_t ulParam) {
 //     xAperiodicRequest_t xReq;
@@ -158,7 +163,7 @@ extern "C" void app_main() {
     xLoggingEnabled = 1; // <-- Start logging
     
     // Binary Semaphore
-    xAperiodicTaskSemaphore = xSemaphoreCreateBinary();
+    // xAperiodicTaskSemaphore = xSemaphoreCreateBinary();
 
     // Set up the ready queue for aperiodic requests
     vSetupAperiodicTasksReadyQueue();
@@ -166,9 +171,12 @@ extern "C" void app_main() {
     // Create aperiodic request generator task
     xTaskCreate( vAperiodicRequestGeneratorTask, "AperiodicReqGenerator", 2048, NULL, 2, NULL );
     
-    // Create the executor aperiodic requests
-    xTaskCreate( vAperiodicRequestExecutorTask, "AperiodicReqExecutor", 2048, NULL, 2, NULL );
+    // Create the executor aperiodic requests ( only for tasks a and b)
+    // xTaskCreate( vAperiodicRequestExecutorTask, "AperiodicReqExecutor", 2048, NULL, 2, NULL );
     
+    // Create periodic task for executing aperiodic requests
+    xTaskCreate( vPeriodicExecutorTask, "PeriodicExecuter", 2048, NULL, 2, NULL );
+
     // Logger
     xTaskCreate(vStopLoggingTask, "Logger", 4096, NULL, 5, NULL);
     ESP_LOGI("app_main", "Tasks started");
