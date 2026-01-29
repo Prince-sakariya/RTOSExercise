@@ -100,6 +100,6 @@ finally:
         # Terminate the process cleanly
         proc.terminate()  # send SIGTERM
         proc.wait(timeout=5)  # wait for process to exit
-        print("Visualization script terminated.")
+        print("Successful.")
     except Exception as e:
         print(f"Failed to launch visualize.py: {e}")

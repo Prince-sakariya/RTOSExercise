@@ -42,13 +42,11 @@ void vAperiodicRequestGeneratorTask( void *pvParameters ) {
 
     TickType_t xNextWakeTime = xTaskGetTickCount();
     while ( 1 ) {
-        vTaskDelayUntil( &xNextWakeTime, pdMS_TO_TICKS( rand() % 10 + 5 )); // Random delay
+        vTaskDelayUntil( &xNextWakeTime, pdMS_TO_TICKS( rand() % 10 + 35 )); // Random delay
 
         // Send to the ready queue
-        if (xQueueSendToBack(xAperiodicReadyQueue, &xRequest, 0) == pdPASS) {
-            // If the request is enqueued, release the semaphore to wake up the task
-            // xSemaphoreGive(xAperiodicTaskSemaphore);
-            continue;
+        if (xQueueSendToBack(xAperiodicReadyQueue, &xRequest, 0) != pdPASS) {
+            ESP_LOGW("Aperiodic Generator", "Queue send failed");
         }
 
     }
@@ -143,7 +141,7 @@ void vPeriodicExecutorTask(void *pvParameters) {
                     /* Miscellaneous (Logging) */
 /***********************************************************************************/
 void vStopLoggingTask(void *pvParameters) {
-    vTaskDelay(pdMS_TO_TICKS(2400));
+    vTaskDelay(pdMS_TO_TICKS(300));
 
     // Stop logging by setting xLoggingEnabled to 0
     xLoggingEnabled = 0;
@@ -169,16 +167,17 @@ extern "C" void app_main() {
     vSetupAperiodicTasksReadyQueue();
 
     // Create aperiodic request generator task
-    xTaskCreate( vAperiodicRequestGeneratorTask, "AperiodicReqGenerator", 2048, NULL, 2, NULL );
+    xTaskCreate( vAperiodicRequestGeneratorTask, "AperiodicReqGen", 4096, NULL, 2, NULL );
     
     // Create the executor aperiodic requests ( only for tasks a and b)
     // xTaskCreate( vAperiodicRequestExecutorTask, "AperiodicReqExecutor", 2048, NULL, 2, NULL );
     
     // Create periodic task for executing aperiodic requests
-    xTaskCreate( vPeriodicExecutorTask, "PeriodicExecuter", 2048, NULL, 2, NULL );
+    xTaskCreate( vPeriodicExecutorTask, "PeriodicExecuter", 4096, NULL, 2, NULL );
 
     // Logger
     xTaskCreate(vStopLoggingTask, "Logger", 4096, NULL, 5, NULL);
+
     ESP_LOGI("app_main", "Tasks started");
 
     /*--------------------------------------------------------------------*/
